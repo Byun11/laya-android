@@ -52,7 +52,7 @@ evaluator is called with `resized_width = width`, `resized_height = height`.
 
 Target availability: the target question was asked (and saved) only on steps whose gold action is a groundable
 CLICK / LONG_PRESS. When a click/long_press must be emitted and no saved target exists (gold not groundable by our
-extractor, or the gold action is not a click), the coordinate is `(-1, -1)`, i.e. a guaranteed miss. This is
+extractor, or the gold action is not a click), the coordinate is far off-screen (`(-10W, -10H)`), i.e. a guaranteed miss. This is
 conservative: it never adds a hit.
 
 ## 4. Metrics
