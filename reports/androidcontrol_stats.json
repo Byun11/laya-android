@@ -1,0 +1,576 @@
+{
+ "train": {
+  "episodes": 13594,
+  "steps": 88308,
+  "steps_excl_done": 74714,
+  "action_types": {
+   "CLICK": 46424,
+   "DONE": 13594,
+   "SCROLL_DOWN": 7721,
+   "INPUT_TEXT": 5406,
+   "WAIT": 5159,
+   "OPEN_APP": 5044,
+   "BACK": 2662,
+   "SCROLL_UP": 1043,
+   "SCROLL_RIGHT": 861,
+   "SCROLL_LEFT": 208,
+   "LONG_PRESS": 157,
+   "HOME": 29
+  },
+  "trajectory_length_excl_done": {
+   "n": 13594,
+   "mean": 5.5,
+   "p50": 5,
+   "p90": 10,
+   "p99": 20,
+   "max": 91
+  },
+  "ui_nodes_per_screen": {
+   "n": 88308,
+   "mean": 222.2,
+   "p50": 155,
+   "p90": 396,
+   "p99": 1472,
+   "max": 20430
+  },
+  "candidates_per_screen": {
+   "n": 88308,
+   "mean": 17.1,
+   "p50": 15,
+   "p90": 32,
+   "p99": 60,
+   "max": 246
+  },
+  "candidates_at_groundable_clicks": {
+   "n": 44140,
+   "mean": 17.9,
+   "p50": 15,
+   "p90": 33,
+   "p99": 65,
+   "max": 246
+  },
+  "candidate_buckets_at_groundable_clicks": {
+   "<=5": 0.1068,
+   "6-10": 0.1812,
+   "11-20": 0.3975,
+   "21-50": 0.2884,
+   ">50": 0.0261
+  },
+  "candidate_buckets_all_steps": {
+   "<=5": 0.1255,
+   "6-10": 0.176,
+   "11-20": 0.3993,
+   "21-50": 0.2798,
+   ">50": 0.0195
+  },
+  "grounding": {
+   "click_steps": 46581,
+   "groundable": 44140,
+   "gold_unlabeled": 4158,
+   "gold_scroll_container_only": 1074,
+   "coverage": 0.9476
+  },
+  "tokens_sampled_steps": 3000,
+  "goal_tokens": {
+   "n": 3000,
+   "mean": 25.8,
+   "p50": 23,
+   "p90": 43,
+   "p99": 73,
+   "max": 105
+  },
+  "state_tokens": {
+   "n": 3000,
+   "mean": 252.2,
+   "p50": 218,
+   "p90": 450,
+   "p99": 769,
+   "max": 1635
+  },
+  "target_head_tokens_untruncated": {
+   "n": 1479,
+   "mean": 238.6,
+   "p50": 193,
+   "p90": 471,
+   "p99": 806,
+   "max": 1641
+  }
+ },
+ "val": {
+  "episodes": 137,
+  "steps": 827,
+  "steps_excl_done": 690,
+  "action_types": {
+   "CLICK": 420,
+   "DONE": 137,
+   "SCROLL_DOWN": 71,
+   "WAIT": 56,
+   "INPUT_TEXT": 53,
+   "OPEN_APP": 45,
+   "BACK": 29,
+   "SCROLL_UP": 9,
+   "SCROLL_LEFT": 3,
+   "SCROLL_RIGHT": 3,
+   "LONG_PRESS": 1
+  },
+  "trajectory_length_excl_done": {
+   "n": 137,
+   "mean": 5.0,
+   "p50": 4,
+   "p90": 9,
+   "p99": 17,
+   "max": 24
+  },
+  "ui_nodes_per_screen": {
+   "n": 827,
+   "mean": 214.4,
+   "p50": 151,
+   "p90": 444,
+   "p99": 1778,
+   "max": 2008
+  },
+  "candidates_per_screen": {
+   "n": 827,
+   "mean": 15.7,
+   "p50": 14,
+   "p90": 29,
+   "p99": 47,
+   "max": 71
+  },
+  "candidates_at_groundable_clicks": {
+   "n": 401,
+   "mean": 16.1,
+   "p50": 14,
+   "p90": 32,
+   "p99": 53,
+   "max": 71
+  },
+  "candidate_buckets_at_groundable_clicks": {
+   "<=5": 0.1421,
+   "6-10": 0.207,
+   "11-20": 0.384,
+   "21-50": 0.2519,
+   ">50": 0.015
+  },
+  "candidate_buckets_all_steps": {
+   "<=5": 0.1475,
+   "6-10": 0.1959,
+   "11-20": 0.3761,
+   "21-50": 0.2733,
+   ">50": 0.0073
+  },
+  "grounding": {
+   "click_steps": 421,
+   "groundable": 401,
+   "gold_unlabeled": 53,
+   "gold_scroll_container_only": 12,
+   "coverage": 0.9525
+  },
+  "tokens_sampled_steps": 827,
+  "goal_tokens": {
+   "n": 827,
+   "mean": 26.2,
+   "p50": 24,
+   "p90": 41,
+   "p99": 55,
+   "max": 55
+  },
+  "state_tokens": {
+   "n": 827,
+   "mean": 234.6,
+   "p50": 206,
+   "p90": 405,
+   "p99": 834,
+   "max": 1014
+  },
+  "target_head_tokens_untruncated": {
+   "n": 401,
+   "mean": 213.9,
+   "p50": 171,
+   "p90": 423,
+   "p99": 805,
+   "max": 1053
+  }
+ },
+ "test_idd": {
+  "episodes": 721,
+  "steps": 4618,
+  "steps_excl_done": 3897,
+  "action_types": {
+   "CLICK": 2445,
+   "DONE": 721,
+   "SCROLL_DOWN": 412,
+   "INPUT_TEXT": 287,
+   "WAIT": 273,
+   "OPEN_APP": 256,
+   "BACK": 117,
+   "SCROLL_UP": 65,
+   "SCROLL_RIGHT": 18,
+   "SCROLL_LEFT": 15,
+   "LONG_PRESS": 9
+  },
+  "trajectory_length_excl_done": {
+   "n": 721,
+   "mean": 5.4,
+   "p50": 5,
+   "p90": 10,
+   "p99": 18,
+   "max": 24
+  },
+  "ui_nodes_per_screen": {
+   "n": 4618,
+   "mean": 221.5,
+   "p50": 157,
+   "p90": 405,
+   "p99": 1339,
+   "max": 2380
+  },
+  "candidates_per_screen": {
+   "n": 4618,
+   "mean": 17.2,
+   "p50": 15,
+   "p90": 32,
+   "p99": 63,
+   "max": 123
+  },
+  "candidates_at_groundable_clicks": {
+   "n": 2337,
+   "mean": 17.9,
+   "p50": 15,
+   "p90": 34,
+   "p99": 68,
+   "max": 100
+  },
+  "candidate_buckets_at_groundable_clicks": {
+   "<=5": 0.1087,
+   "6-10": 0.1801,
+   "11-20": 0.3855,
+   "21-50": 0.2965,
+   ">50": 0.0291
+  },
+  "candidate_buckets_all_steps": {
+   "<=5": 0.1223,
+   "6-10": 0.1726,
+   "11-20": 0.3913,
+   "21-50": 0.2951,
+   ">50": 0.0186
+  },
+  "grounding": {
+   "click_steps": 2454,
+   "groundable": 2337,
+   "gold_unlabeled": 225,
+   "gold_scroll_container_only": 61,
+   "coverage": 0.9523
+  },
+  "tokens_sampled_steps": 3000,
+  "goal_tokens": {
+   "n": 3000,
+   "mean": 25.7,
+   "p50": 24,
+   "p90": 42,
+   "p99": 68,
+   "max": 183
+  },
+  "state_tokens": {
+   "n": 3000,
+   "mean": 248.4,
+   "p50": 217,
+   "p90": 448,
+   "p99": 790,
+   "max": 1487
+  },
+  "target_head_tokens_untruncated": {
+   "n": 1505,
+   "mean": 231.7,
+   "p50": 187,
+   "p90": 451,
+   "p99": 864,
+   "max": 1519
+  }
+ },
+ "test_app_unseen": {
+  "episodes": 631,
+  "steps": 4106,
+  "steps_excl_done": 3475,
+  "action_types": {
+   "CLICK": 2024,
+   "DONE": 631,
+   "SCROLL_DOWN": 414,
+   "OPEN_APP": 243,
+   "INPUT_TEXT": 243,
+   "WAIT": 226,
+   "BACK": 211,
+   "SCROLL_RIGHT": 66,
+   "SCROLL_LEFT": 26,
+   "SCROLL_UP": 22
+  },
+  "trajectory_length_excl_done": {
+   "n": 631,
+   "mean": 5.5,
+   "p50": 5,
+   "p90": 9,
+   "p99": 16,
+   "max": 22
+  },
+  "ui_nodes_per_screen": {
+   "n": 4106,
+   "mean": 185.4,
+   "p50": 134,
+   "p90": 339,
+   "p99": 946,
+   "max": 1878
+  },
+  "candidates_per_screen": {
+   "n": 4106,
+   "mean": 14.1,
+   "p50": 13,
+   "p90": 25,
+   "p99": 48,
+   "max": 99
+  },
+  "candidates_at_groundable_clicks": {
+   "n": 1888,
+   "mean": 15.9,
+   "p50": 14,
+   "p90": 28,
+   "p99": 56,
+   "max": 99
+  },
+  "candidate_buckets_at_groundable_clicks": {
+   "<=5": 0.1086,
+   "6-10": 0.1912,
+   "11-20": 0.4693,
+   "21-50": 0.2172,
+   ">50": 0.0138
+  },
+  "candidate_buckets_all_steps": {
+   "<=5": 0.17,
+   "6-10": 0.2097,
+   "11-20": 0.4289,
+   "21-50": 0.1829,
+   ">50": 0.0085
+  },
+  "grounding": {
+   "click_steps": 2024,
+   "groundable": 1888,
+   "gold_unlabeled": 288,
+   "gold_scroll_container_only": 34,
+   "coverage": 0.9328
+  },
+  "tokens_sampled_steps": 3000,
+  "goal_tokens": {
+   "n": 3000,
+   "mean": 21.4,
+   "p50": 19,
+   "p90": 34,
+   "p99": 52,
+   "max": 74
+  },
+  "state_tokens": {
+   "n": 3000,
+   "mean": 203.3,
+   "p50": 190,
+   "p90": 332,
+   "p99": 666,
+   "max": 1072
+  },
+  "target_head_tokens_untruncated": {
+   "n": 1379,
+   "mean": 201.5,
+   "p50": 177,
+   "p90": 361,
+   "p99": 747,
+   "max": 1115
+  }
+ },
+ "test_task_unseen": {
+  "episodes": 803,
+  "steps": 5267,
+  "steps_excl_done": 4464,
+  "action_types": {
+   "CLICK": 2583,
+   "DONE": 803,
+   "SCROLL_DOWN": 527,
+   "OPEN_APP": 347,
+   "INPUT_TEXT": 338,
+   "WAIT": 284,
+   "BACK": 223,
+   "SCROLL_RIGHT": 74,
+   "SCROLL_LEFT": 57,
+   "SCROLL_UP": 31
+  },
+  "trajectory_length_excl_done": {
+   "n": 803,
+   "mean": 5.6,
+   "p50": 5,
+   "p90": 9,
+   "p99": 17,
+   "max": 24
+  },
+  "ui_nodes_per_screen": {
+   "n": 5267,
+   "mean": 181.6,
+   "p50": 138,
+   "p90": 342,
+   "p99": 849,
+   "max": 1878
+  },
+  "candidates_per_screen": {
+   "n": 5267,
+   "mean": 14.0,
+   "p50": 13,
+   "p90": 24,
+   "p99": 45,
+   "max": 76
+  },
+  "candidates_at_groundable_clicks": {
+   "n": 2383,
+   "mean": 15.5,
+   "p50": 14,
+   "p90": 26,
+   "p99": 50,
+   "max": 74
+  },
+  "candidate_buckets_at_groundable_clicks": {
+   "<=5": 0.123,
+   "6-10": 0.1851,
+   "11-20": 0.462,
+   "21-50": 0.2203,
+   ">50": 0.0097
+  },
+  "candidate_buckets_all_steps": {
+   "<=5": 0.1644,
+   "6-10": 0.2161,
+   "11-20": 0.4243,
+   "21-50": 0.1902,
+   ">50": 0.0049
+  },
+  "grounding": {
+   "click_steps": 2583,
+   "groundable": 2383,
+   "gold_unlabeled": 314,
+   "gold_scroll_container_only": 40,
+   "coverage": 0.9226
+  },
+  "tokens_sampled_steps": 3000,
+  "goal_tokens": {
+   "n": 3000,
+   "mean": 22.1,
+   "p50": 20,
+   "p90": 35,
+   "p99": 52,
+   "max": 78
+  },
+  "state_tokens": {
+   "n": 3000,
+   "mean": 203.4,
+   "p50": 191,
+   "p90": 329,
+   "p99": 605,
+   "max": 1052
+  },
+  "target_head_tokens_untruncated": {
+   "n": 1333,
+   "mean": 195.9,
+   "p50": 179,
+   "p90": 327,
+   "p99": 655,
+   "max": 1093
+  }
+ },
+ "test_category_unseen": {
+  "episodes": 700,
+  "steps": 4591,
+  "steps_excl_done": 3891,
+  "action_types": {
+   "CLICK": 2241,
+   "DONE": 700,
+   "SCROLL_DOWN": 499,
+   "OPEN_APP": 280,
+   "INPUT_TEXT": 268,
+   "WAIT": 240,
+   "BACK": 215,
+   "SCROLL_RIGHT": 71,
+   "SCROLL_LEFT": 47,
+   "SCROLL_UP": 30
+  },
+  "trajectory_length_excl_done": {
+   "n": 700,
+   "mean": 5.6,
+   "p50": 5,
+   "p90": 9,
+   "p99": 18,
+   "max": 24
+  },
+  "ui_nodes_per_screen": {
+   "n": 4591,
+   "mean": 184.7,
+   "p50": 138,
+   "p90": 349,
+   "p99": 871,
+   "max": 1878
+  },
+  "candidates_per_screen": {
+   "n": 4591,
+   "mean": 14.2,
+   "p50": 13,
+   "p90": 25,
+   "p99": 48,
+   "max": 76
+  },
+  "candidates_at_groundable_clicks": {
+   "n": 2102,
+   "mean": 16.0,
+   "p50": 14,
+   "p90": 27,
+   "p99": 53,
+   "max": 74
+  },
+  "candidate_buckets_at_groundable_clicks": {
+   "<=5": 0.1051,
+   "6-10": 0.1817,
+   "11-20": 0.4681,
+   "21-50": 0.2341,
+   ">50": 0.0109
+  },
+  "candidate_buckets_all_steps": {
+   "<=5": 0.1616,
+   "6-10": 0.2111,
+   "11-20": 0.4226,
+   "21-50": 0.1991,
+   ">50": 0.0057
+  },
+  "grounding": {
+   "click_steps": 2241,
+   "groundable": 2102,
+   "gold_unlabeled": 292,
+   "gold_scroll_container_only": 36,
+   "coverage": 0.938
+  },
+  "tokens_sampled_steps": 3000,
+  "goal_tokens": {
+   "n": 3000,
+   "mean": 21.4,
+   "p50": 20,
+   "p90": 34,
+   "p99": 52,
+   "max": 59
+  },
+  "state_tokens": {
+   "n": 3000,
+   "mean": 202.2,
+   "p50": 192,
+   "p90": 325,
+   "p99": 589,
+   "max": 961
+  },
+  "target_head_tokens_untruncated": {
+   "n": 1380,
+   "mean": 198.7,
+   "p50": 180,
+   "p90": 330,
+   "p99": 709,
+   "max": 1000
+  }
+ }
+}

@@ -1,0 +1,120 @@
+{
+ "config": {
+  "name": "smoke",
+  "base": "multilingual",
+  "train_steps": 15000,
+  "seed": 0,
+  "epochs": 1,
+  "micro_batch": 8,
+  "grad_accum": 4,
+  "encoder_lr": 2.5e-05,
+  "head_lr": 0.0001,
+  "loss": "soft-ce",
+  "shuffle_options": [
+   "choice"
+  ],
+  "gradient_checkpointing": true
+ },
+ "train_steps": 15003,
+ "train_items": 22474,
+ "skipped": {},
+ "epochs": [
+  {
+   "epoch": 1,
+   "train_loss": 1.3122550388247942,
+   "val": {
+    "steps": 827,
+    "operation_accuracy": 0.6892,
+    "target_top1_accuracy": 0.4738,
+    "joint_action_accuracy": 0.456,
+    "grounding_coverage": 0.9525,
+    "ece_operation": 0.0549,
+    "brier_operation": 0.445,
+    "ece_target": 0.0649,
+    "brier_target": 0.642,
+    "latency_ms_median": null,
+    "latency_ms_p95": null,
+    "target_top1_by_candidates": {
+     "1-5": {
+      "acc": 0.7018,
+      "n": 57
+     },
+     "6-10": {
+      "acc": 0.5422,
+      "n": 83
+     },
+     "11-20": {
+      "acc": 0.4351,
+      "n": 154
+     },
+     "21-50": {
+      "acc": 0.3663,
+      "n": 101
+     },
+     ">50": {
+      "acc": 0.1667,
+      "n": 6
+     }
+    },
+    "op_recall": {
+     "CLICK": {
+      "acc": 0.9048,
+      "n": 420
+     },
+     "LONG_PRESS": {
+      "acc": 0.0,
+      "n": 1
+     },
+     "SCROLL_UP": {
+      "acc": 0.3333,
+      "n": 9
+     },
+     "SCROLL_DOWN": {
+      "acc": 0.5493,
+      "n": 71
+     },
+     "SCROLL_LEFT": {
+      "acc": 0.0,
+      "n": 3
+     },
+     "SCROLL_RIGHT": {
+      "acc": 0.0,
+      "n": 3
+     },
+     "OPEN_APP": {
+      "acc": 0.8222,
+      "n": 45
+     },
+     "INPUT_TEXT": {
+      "acc": 0.8113,
+      "n": 53
+     },
+     "BACK": {
+      "acc": 0.1034,
+      "n": 29
+     },
+     "WAIT": {
+      "acc": 0.2679,
+      "n": 56
+     },
+     "DONE": {
+      "acc": 0.365,
+      "n": 137
+     }
+    },
+    "unfit_items": {}
+   }
+  }
+ ],
+ "train_hours": 0.156,
+ "best": {
+  "joint": 0.456,
+  "epoch": 1
+ },
+ "temperature": [
+  1.0897927284240723,
+  1.0,
+  1.0
+ ],
+ "hardware": "NVIDIA GeForce RTX 4090"
+}

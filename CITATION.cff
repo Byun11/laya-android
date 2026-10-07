@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: Laya-Android
+type: software
+version: 0.1.0
+date-released: 2026-10-07
+license: Apache-2.0
+repository-code: https://github.com/Byun11/laya-android
+abstract: >-
+  Laya-Android is a 322M non-generative decision model specialized for Android GUI
+  action selection from accessibility-based interaction trajectories. It fine-tunes
+  the Laya typed-decision model (Convai Innovations) on AndroidControl.
+authors:
+  - given-names: Jaeyeon
+    family-names: Byun
+    alias: Byun11
+references:
+  - type: software
+    title: Laya
+    authors:
+      - name: Convai Innovations
+    url: https://github.com/NandhaKishorM/laya
+    license: Apache-2.0
+  - type: article
+    title: On the Effects of Data Scale on Computer Control Agents
+    authors:
+      - family-names: Li
+        given-names: Wei
+      - family-names: Bishop
+        given-names: William
+      - family-names: Li
+        given-names: Alice
+      - family-names: Rawles
+        given-names: Chris
+      - family-names: Campbell-Ajala
+        given-names: Folawiyo
+      - family-names: Tyamagundlu
+        given-names: Divya
+      - family-names: Riva
+        given-names: Oriana
+    journal: arXiv preprint arXiv:2406.03679
+    year: 2024

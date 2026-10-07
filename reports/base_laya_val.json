@@ -1,0 +1,132 @@
+{
+ "model": "multilingual",
+ "low_level": false,
+ "max_len": 3072,
+ "head_max_len": 1536,
+ "limit": null,
+ "splits": {
+  "val": {
+   "steps": 827,
+   "operation_accuracy": 0.2225,
+   "target_top1_accuracy": 0.1097,
+   "joint_action_accuracy": 0.0979,
+   "grounding_coverage": 0.9525,
+   "ece_operation": 0.6037,
+   "brier_operation": 1.3205,
+   "ece_target": 0.4155,
+   "brier_target": 1.1542,
+   "latency_ms_median": 39.31,
+   "latency_ms_p95": 42.39,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.2807,
+     "n": 57
+    },
+    "6-10": {
+     "acc": 0.0602,
+     "n": 83
+    },
+    "11-20": {
+     "acc": 0.1169,
+     "n": 154
+    },
+    "21-50": {
+     "acc": 0.0495,
+     "n": 101
+    },
+    ">50": {
+     "acc": 0.0,
+     "n": 6
+    }
+   },
+   "operation_macro_f1": 0.1418,
+   "op_per_class": {
+    "CLICK": {
+     "precision": 0.4609,
+     "recall": 0.281,
+     "f1": 0.3491,
+     "n_gold": 420,
+     "n_pred": 256
+    },
+    "LONG_PRESS": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 1,
+     "n_pred": 3
+    },
+    "SCROLL_UP": {
+     "precision": 0.1176,
+     "recall": 0.4444,
+     "f1": 0.186,
+     "n_gold": 9,
+     "n_pred": 34
+    },
+    "SCROLL_DOWN": {
+     "precision": 0.3704,
+     "recall": 0.2817,
+     "f1": 0.32,
+     "n_gold": 71,
+     "n_pred": 54
+    },
+    "SCROLL_LEFT": {
+     "precision": 0.5,
+     "recall": 0.3333,
+     "f1": 0.4,
+     "n_gold": 3,
+     "n_pred": 2
+    },
+    "SCROLL_RIGHT": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 3,
+     "n_pred": 4
+    },
+    "OPEN_APP": {
+     "precision": 0.0954,
+     "recall": 0.5556,
+     "f1": 0.1629,
+     "n_gold": 45,
+     "n_pred": 262
+    },
+    "INPUT_TEXT": {
+     "precision": 0.0233,
+     "recall": 0.0377,
+     "f1": 0.0288,
+     "n_gold": 53,
+     "n_pred": 86
+    },
+    "BACK": {
+     "precision": 0.1556,
+     "recall": 0.2414,
+     "f1": 0.1892,
+     "n_gold": 29,
+     "n_pred": 45
+    },
+    "HOME": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 0,
+     "n_pred": 1
+    },
+    "WAIT": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 56,
+     "n_pred": 5
+    },
+    "DONE": {
+     "precision": 0.0933,
+     "recall": 0.0511,
+     "f1": 0.066,
+     "n_gold": 137,
+     "n_pred": 75
+    }
+   },
+   "unfit_items": {}
+  }
+ }
+}

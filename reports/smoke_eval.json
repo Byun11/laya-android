@@ -1,0 +1,407 @@
+{
+ "model": "D:/laya-android/checkpoints/smoke",
+ "low_level": false,
+ "max_len": 3072,
+ "head_max_len": 1536,
+ "limit": null,
+ "splits": {
+  "val": {
+   "steps": 827,
+   "operation_accuracy": 0.6892,
+   "target_top1_accuracy": 0.4763,
+   "joint_action_accuracy": 0.4572,
+   "grounding_coverage": 0.9525,
+   "ece_operation": 0.0378,
+   "brier_operation": 0.4427,
+   "ece_target": 0.0413,
+   "brier_target": 0.6424,
+   "latency_ms_median": 38.92,
+   "latency_ms_p95": 42.41,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.7018,
+     "n": 57
+    },
+    "6-10": {
+     "acc": 0.5422,
+     "n": 83
+    },
+    "11-20": {
+     "acc": 0.4351,
+     "n": 154
+    },
+    "21-50": {
+     "acc": 0.3762,
+     "n": 101
+    },
+    ">50": {
+     "acc": 0.1667,
+     "n": 6
+    }
+   },
+   "op_recall": {
+    "CLICK": {
+     "acc": 0.9048,
+     "n": 420
+    },
+    "LONG_PRESS": {
+     "acc": 0.0,
+     "n": 1
+    },
+    "SCROLL_UP": {
+     "acc": 0.3333,
+     "n": 9
+    },
+    "SCROLL_DOWN": {
+     "acc": 0.5493,
+     "n": 71
+    },
+    "SCROLL_LEFT": {
+     "acc": 0.0,
+     "n": 3
+    },
+    "SCROLL_RIGHT": {
+     "acc": 0.0,
+     "n": 3
+    },
+    "OPEN_APP": {
+     "acc": 0.8222,
+     "n": 45
+    },
+    "INPUT_TEXT": {
+     "acc": 0.8113,
+     "n": 53
+    },
+    "BACK": {
+     "acc": 0.1034,
+     "n": 29
+    },
+    "WAIT": {
+     "acc": 0.2679,
+     "n": 56
+    },
+    "DONE": {
+     "acc": 0.365,
+     "n": 137
+    }
+   },
+   "unfit_items": {}
+  },
+  "test_idd": {
+   "steps": 4618,
+   "operation_accuracy": 0.6923,
+   "target_top1_accuracy": 0.4724,
+   "joint_action_accuracy": 0.4452,
+   "grounding_coverage": 0.9523,
+   "ece_operation": 0.0249,
+   "brier_operation": 0.4247,
+   "ece_target": 0.0266,
+   "brier_target": 0.6632,
+   "latency_ms_median": 38.62,
+   "latency_ms_p95": 41.22,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.748,
+     "n": 254
+    },
+    "6-10": {
+     "acc": 0.4798,
+     "n": 421
+    },
+    "11-20": {
+     "acc": 0.4628,
+     "n": 901
+    },
+    "21-50": {
+     "acc": 0.3911,
+     "n": 693
+    },
+    ">50": {
+     "acc": 0.3529,
+     "n": 68
+    }
+   },
+   "op_recall": {
+    "CLICK": {
+     "acc": 0.899,
+     "n": 2445
+    },
+    "LONG_PRESS": {
+     "acc": 0.0,
+     "n": 9
+    },
+    "SCROLL_UP": {
+     "acc": 0.4923,
+     "n": 65
+    },
+    "SCROLL_DOWN": {
+     "acc": 0.5752,
+     "n": 412
+    },
+    "SCROLL_LEFT": {
+     "acc": 0.1333,
+     "n": 15
+    },
+    "SCROLL_RIGHT": {
+     "acc": 0.1111,
+     "n": 18
+    },
+    "OPEN_APP": {
+     "acc": 0.7656,
+     "n": 256
+    },
+    "INPUT_TEXT": {
+     "acc": 0.7317,
+     "n": 287
+    },
+    "BACK": {
+     "acc": 0.0513,
+     "n": 117
+    },
+    "WAIT": {
+     "acc": 0.1575,
+     "n": 273
+    },
+    "DONE": {
+     "acc": 0.3759,
+     "n": 721
+    }
+   },
+   "unfit_items": {}
+  },
+  "test_app_unseen": {
+   "steps": 4106,
+   "operation_accuracy": 0.6444,
+   "target_top1_accuracy": 0.5291,
+   "joint_action_accuracy": 0.4504,
+   "grounding_coverage": 0.9328,
+   "ece_operation": 0.0432,
+   "brier_operation": 0.488,
+   "ece_target": 0.0447,
+   "brier_target": 0.6034,
+   "latency_ms_median": 38.88,
+   "latency_ms_p95": 42.19,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.7024,
+     "n": 205
+    },
+    "6-10": {
+     "acc": 0.5623,
+     "n": 361
+    },
+    "11-20": {
+     "acc": 0.5451,
+     "n": 886
+    },
+    "21-50": {
+     "acc": 0.3976,
+     "n": 410
+    },
+    ">50": {
+     "acc": 0.2308,
+     "n": 26
+    }
+   },
+   "op_recall": {
+    "CLICK": {
+     "acc": 0.8641,
+     "n": 2024
+    },
+    "SCROLL_UP": {
+     "acc": 0.0,
+     "n": 22
+    },
+    "SCROLL_DOWN": {
+     "acc": 0.4928,
+     "n": 414
+    },
+    "SCROLL_LEFT": {
+     "acc": 0.1538,
+     "n": 26
+    },
+    "SCROLL_RIGHT": {
+     "acc": 0.6818,
+     "n": 66
+    },
+    "OPEN_APP": {
+     "acc": 0.7695,
+     "n": 243
+    },
+    "INPUT_TEXT": {
+     "acc": 0.93,
+     "n": 243
+    },
+    "BACK": {
+     "acc": 0.0427,
+     "n": 211
+    },
+    "WAIT": {
+     "acc": 0.1681,
+     "n": 226
+    },
+    "DONE": {
+     "acc": 0.2916,
+     "n": 631
+    }
+   },
+   "unfit_items": {}
+  },
+  "test_task_unseen": {
+   "steps": 5267,
+   "operation_accuracy": 0.6634,
+   "target_top1_accuracy": 0.535,
+   "joint_action_accuracy": 0.4681,
+   "grounding_coverage": 0.9226,
+   "ece_operation": 0.0351,
+   "brier_operation": 0.467,
+   "ece_target": 0.0443,
+   "brier_target": 0.5922,
+   "latency_ms_median": 38.77,
+   "latency_ms_p95": 40.65,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.7167,
+     "n": 293
+    },
+    "6-10": {
+     "acc": 0.585,
+     "n": 441
+    },
+    "11-20": {
+     "acc": 0.5604,
+     "n": 1101
+    },
+    "21-50": {
+     "acc": 0.3524,
+     "n": 525
+    },
+    ">50": {
+     "acc": 0.2174,
+     "n": 23
+    }
+   },
+   "op_recall": {
+    "CLICK": {
+     "acc": 0.8773,
+     "n": 2583
+    },
+    "SCROLL_UP": {
+     "acc": 0.0645,
+     "n": 31
+    },
+    "SCROLL_DOWN": {
+     "acc": 0.5446,
+     "n": 527
+    },
+    "SCROLL_LEFT": {
+     "acc": 0.0702,
+     "n": 57
+    },
+    "SCROLL_RIGHT": {
+     "acc": 0.6216,
+     "n": 74
+    },
+    "OPEN_APP": {
+     "acc": 0.8012,
+     "n": 347
+    },
+    "INPUT_TEXT": {
+     "acc": 0.9024,
+     "n": 338
+    },
+    "BACK": {
+     "acc": 0.0404,
+     "n": 223
+    },
+    "WAIT": {
+     "acc": 0.1585,
+     "n": 284
+    },
+    "DONE": {
+     "acc": 0.3138,
+     "n": 803
+    }
+   },
+   "unfit_items": {}
+  },
+  "test_category_unseen": {
+   "steps": 4591,
+   "operation_accuracy": 0.65,
+   "target_top1_accuracy": 0.5319,
+   "joint_action_accuracy": 0.4571,
+   "grounding_coverage": 0.938,
+   "ece_operation": 0.0367,
+   "brier_operation": 0.4819,
+   "ece_target": 0.0506,
+   "brier_target": 0.5963,
+   "latency_ms_median": 38.75,
+   "latency_ms_p95": 41.01,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.7195,
+     "n": 221
+    },
+    "6-10": {
+     "acc": 0.5864,
+     "n": 382
+    },
+    "11-20": {
+     "acc": 0.562,
+     "n": 984
+    },
+    "21-50": {
+     "acc": 0.3598,
+     "n": 492
+    },
+    ">50": {
+     "acc": 0.2174,
+     "n": 23
+    }
+   },
+   "op_recall": {
+    "CLICK": {
+     "acc": 0.8706,
+     "n": 2241
+    },
+    "SCROLL_UP": {
+     "acc": 0.0667,
+     "n": 30
+    },
+    "SCROLL_DOWN": {
+     "acc": 0.5391,
+     "n": 499
+    },
+    "SCROLL_LEFT": {
+     "acc": 0.0638,
+     "n": 47
+    },
+    "SCROLL_RIGHT": {
+     "acc": 0.6479,
+     "n": 71
+    },
+    "OPEN_APP": {
+     "acc": 0.7821,
+     "n": 280
+    },
+    "INPUT_TEXT": {
+     "acc": 0.8993,
+     "n": 268
+    },
+    "BACK": {
+     "acc": 0.0419,
+     "n": 215
+    },
+    "WAIT": {
+     "acc": 0.1667,
+     "n": 240
+    },
+    "DONE": {
+     "acc": 0.2914,
+     "n": 700
+    }
+   },
+   "unfit_items": {}
+  }
+ }
+}

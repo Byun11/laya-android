@@ -1,0 +1,12 @@
+name: laya-android-v0
+base: multilingual            # convaiinnovations/laya@7b928d8 / multilingual (mmBERT-base, 322M)
+train_steps: null             # whole AndroidControl train split
+seed: 0
+epochs: 3                     # best epoch by val joint accuracy is kept
+micro_batch: 8
+grad_accum: 4
+encoder_lr: 2.5e-5
+head_lr: 1.0e-4
+loss: soft-ce
+shuffle_options: [choice]
+gradient_checkpointing: true

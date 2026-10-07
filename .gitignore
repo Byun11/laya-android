@@ -1,0 +1,19 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+/data/
+/checkpoints/
+/outputs/
+/cache/
+*.tfrecord
+*.tfrecord.gz
+*.bin
+*.safetensors
+wandb/
+.DS_Store
+
+# local-only working notes, third-party clones and HF staging
+research/
+tasks/
+hf_staging/

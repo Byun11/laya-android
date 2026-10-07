@@ -1,0 +1,29 @@
+Laya-Android
+Copyright 2026 Jaeyeon Byun
+
+This project is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This project builds on the following third-party work:
+
+1. Laya (code and model weights) by Convai Innovations
+   https://github.com/NandhaKishorM/laya
+   https://huggingface.co/convaiinnovations/laya
+   Licensed under the Apache License, Version 2.0.
+   Laya-Android fine-tunes the `multilingual` checkpoint of convaiinnovations/laya
+   (revision 7b928d828b7b0e022f929d9bd2e44165aa270148) and uses the `laya` Python
+   package (0.3.28) for model code, input encoding and the training loop.
+   Laya-Android is not affiliated with or endorsed by Convai Innovations.
+
+2. mmBERT-base (encoder backbone inside the Laya multilingual checkpoint)
+   https://huggingface.co/jhu-clsp/mmBERT-base
+   Licensed under the MIT License.
+
+3. AndroidControl dataset by Google Research
+   https://github.com/google-research/google-research/tree/master/android_control
+   Copyright 2024 The Google Research Authors.
+   Licensed under the Apache License, Version 2.0.
+   Li et al., "On the Effects of Data Scale on Computer Control Agents", arXiv:2406.03679.
+   The dataset is not redistributed in this repository.
+
+4. Accessibility proto field layout follows google-deepmind/android_env
+   (Apache License, Version 2.0). No android_env code is included.

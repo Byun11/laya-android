@@ -1,0 +1,125 @@
+{
+ "model": "D:/laya-android/checkpoints/smoke",
+ "low_level": false,
+ "max_len": 3072,
+ "head_max_len": 1536,
+ "limit": null,
+ "splits": {
+  "val": {
+   "steps": 827,
+   "operation_accuracy": 0.6892,
+   "target_top1_accuracy": 0.4763,
+   "joint_action_accuracy": 0.4572,
+   "grounding_coverage": 0.9525,
+   "ece_operation": 0.0378,
+   "brier_operation": 0.4427,
+   "ece_target": 0.0413,
+   "brier_target": 0.6424,
+   "latency_ms_median": 39.64,
+   "latency_ms_p95": 42.26,
+   "target_top1_by_candidates": {
+    "1-5": {
+     "acc": 0.7018,
+     "n": 57
+    },
+    "6-10": {
+     "acc": 0.5422,
+     "n": 83
+    },
+    "11-20": {
+     "acc": 0.4351,
+     "n": 154
+    },
+    "21-50": {
+     "acc": 0.3762,
+     "n": 101
+    },
+    ">50": {
+     "acc": 0.1667,
+     "n": 6
+    }
+   },
+   "operation_macro_f1": 0.4104,
+   "op_per_class": {
+    "CLICK": {
+     "precision": 0.6762,
+     "recall": 0.9048,
+     "f1": 0.7739,
+     "n_gold": 420,
+     "n_pred": 562
+    },
+    "LONG_PRESS": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 1,
+     "n_pred": 0
+    },
+    "SCROLL_UP": {
+     "precision": 0.75,
+     "recall": 0.3333,
+     "f1": 0.4615,
+     "n_gold": 9,
+     "n_pred": 4
+    },
+    "SCROLL_DOWN": {
+     "precision": 0.5493,
+     "recall": 0.5493,
+     "f1": 0.5493,
+     "n_gold": 71,
+     "n_pred": 71
+    },
+    "SCROLL_LEFT": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 3,
+     "n_pred": 0
+    },
+    "SCROLL_RIGHT": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "n_gold": 3,
+     "n_pred": 2
+    },
+    "OPEN_APP": {
+     "precision": 0.881,
+     "recall": 0.8222,
+     "f1": 0.8506,
+     "n_gold": 45,
+     "n_pred": 42
+    },
+    "INPUT_TEXT": {
+     "precision": 0.8431,
+     "recall": 0.8113,
+     "f1": 0.8269,
+     "n_gold": 53,
+     "n_pred": 51
+    },
+    "BACK": {
+     "precision": 0.5,
+     "recall": 0.1034,
+     "f1": 0.1714,
+     "n_gold": 29,
+     "n_pred": 6
+    },
+    "WAIT": {
+     "precision": 0.75,
+     "recall": 0.2679,
+     "f1": 0.3947,
+     "n_gold": 56,
+     "n_pred": 20
+    },
+    "DONE": {
+     "precision": 0.7246,
+     "recall": 0.365,
+     "f1": 0.4854,
+     "n_gold": 137,
+     "n_pred": 69
+    }
+   },
+   "unfit_items": {}
+  }
+ }
+}

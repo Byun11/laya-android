@@ -1,0 +1,12 @@
+name: smoke
+base: multilingual            # convaiinnovations/laya@7b928d8 / multilingual (mmBERT-base, 322M)
+train_steps: 15000            # action steps, sampled by whole episodes (seeded)
+seed: 0
+epochs: 1
+micro_batch: 8
+grad_accum: 4                 # effective batch 32 questions
+encoder_lr: 2.5e-5
+head_lr: 1.0e-4
+loss: soft-ce                 # plain CE over options (hard labels)
+shuffle_options: [choice]     # random option order per item; eval uses canonical order
+gradient_checkpointing: true
