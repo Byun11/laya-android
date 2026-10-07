@@ -1,7 +1,7 @@
 """Stage (and optionally upload) a Laya-Android checkpoint as a Hugging Face model repo.
 
 python scripts/publish_hf.py --checkpoint D:/laya-android/checkpoints/laya-android-v0 \
-    --repo <namespace>/laya-android --eval reports/val.json [--eval reports/test.json] [--upload]
+    --repo <namespace>/laya-android --eval results/test/final_metrics.json [--eval ...] [--upload]
 
 Without --upload it only writes $LAYA_ANDROID_DATA/hf_staging/<repo-name>/ for inspection. The staged folder loads with
 `laya.load(path)`: model.safetensors, encoder/, tokenizer/, rl_agent_config.json, plus README.md

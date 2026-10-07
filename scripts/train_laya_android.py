@@ -4,7 +4,7 @@ Reuses laya.train.train_model (soft-CE over options) with two changes: bf16 auto
 hardcoded fp16, and per-epoch val evaluation keeping the best epoch by val joint accuracy.
 Temperatures are fit on the val split afterwards (never on train or test).
 Out: $LAYA_ANDROID_DATA/checkpoints/<name>/epoch{1..N}/ (uncalibrated, all kept), <name>/ = best epoch
-     with val temperatures, and reports/train_<name>.json
+     with val temperatures, and results/val/train_<name>.json
 """
 import json
 import os
@@ -71,7 +71,7 @@ def main(cfg_path):
     with open(cfg_path) as f:
         c = yaml.safe_load(f)
     out_dir = os.path.join(AC.DATA_ROOT, "checkpoints", c["name"])
-    report_path = os.path.join(os.path.dirname(__file__), "..", "reports", "train_%s.json" % c["name"])
+    report_path = os.path.join(os.path.dirname(__file__), "..", "results", "val", "train_%s.json" % c["name"])
     steps, n_eps = load_steps(os.path.join(PROC, "train.jsonl"), c["train_steps"], c["seed"])
     model, tok, base_cfg = LT.load_checkpoint(c["base"])
     items, skipped = LT.items_from_rows(tok, (S.row(it) for it in steps), MAX_LEN, HEAD_MAX_LEN)

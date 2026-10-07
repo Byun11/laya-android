@@ -1,6 +1,6 @@
 """Offline AndroidControl evaluation, one harness for base and fine-tuned Laya.
 
-python scripts/eval_laya_android.py --model D:/laya-android/checkpoints/smoke --out reports/x.json [--splits val] [--limit N] [--low-level]
+python scripts/eval_laya_android.py --model D:/laya-android/checkpoints/smoke --out results/val/x.json [--splits val] [--limit N] [--low-level]
 
 Metrics per split:
   operation_accuracy  over all steps (incl. synthetic DONE)
@@ -29,7 +29,7 @@ from data import android_control as AC  # noqa: E402
 
 PROC = os.path.join(AC.DATA_ROOT, "processed", "androidcontrol")
 BUCKETS = [("1-5", 1, 5), ("6-10", 6, 10), ("11-20", 11, 20), ("21-50", 21, 50), (">50", 51, 10 ** 9)]
-MAX_LEN, HEAD_MAX_LEN = 3072, 1536  # from reports/androidcontrol_stats.json: no candidate is dropped
+MAX_LEN, HEAD_MAX_LEN = 3072, 1536  # from results/data/androidcontrol_stats.json: no candidate is dropped
 
 
 def load(model):

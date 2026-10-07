@@ -85,22 +85,53 @@ Candidate labels must follow the repository's `src/candidates.py` / `src/seriali
 
 AndroidControl-High, 8,444 test steps, public InfiGUI-R1 evaluator. Same model before and after fine-tuning:
 
+<!-- table: AndroidControl-High: base vs fine-tuned (official evaluator) -->
 | Model | Params | Type | Grounding | Full SR |
 |---|---:|---:|---:|---:|
 | Laya base (zero-shot) | 322M | 29.0 | 11.8 | N/A |
 | **Laya-Android** | **322M** | **76.7** | **61.7** | **N/A** |
 | Δ | | +47.6 | +49.9 | |
+<!-- /table -->
 
 Full SR is N/A (v0 does not generate text or app names). Screenshot VLMs on the same evaluator report higher numbers (e.g. InfiGUI-R1-3B 82.7 / 74.4) but solve a different task (pixel coordinates vs. choosing accessibility candidates).
 
+<!-- table: Base Laya → Laya-Android (Policy Joint Accuracy, test) -->
 | Split | Base Laya | Laya-Android | Δ |
 |---|---:|---:|---:|
 | IDD | 0.115 | **0.659** | +54.4pt |
 | App-Unseen | 0.112 | **0.540** | +42.8pt |
 | Task-Unseen | 0.108 | **0.567** | +45.9pt |
 | Category-Unseen | 0.108 | **0.545** | +43.7pt |
+<!-- /table -->
 
 Policy Joint = operation correct and, for clicks, the gold element chosen (internal metric, not SR). One test pass of the frozen checkpoint; protocol fixed before scoring ([eval_protocol.md](https://github.com/Byun11/laya-android/blob/main/docs/eval_protocol.md)).
+
+## Compared with generative models
+
+![Accuracy and latency, same input](figures/efficiency_scatter.png)
+
+<!-- table: Same-input comparison (1,000 test steps) -->
+| Model | Params | Serving | Type | Grounding | Median latency | p95 | vs Laya-Android |
+|---|---|---|---:|---:|---:|---:|---:|
+| **Laya-Android** | 322M | Laya-Android (local) | **77.2** | **62.8** | **39 ms** | 48 ms | 1x |
+| Qwen3.8 27B | 27B (Q4_K_M) | Ollama GGUF | 76.8 | 64.5 | 575 ms | 694 ms | 14.9x slower |
+| jev-1.13.0 | undisclosed | TypeSafe API | 67.6 | 56.4 | 244 ms | 308 ms | 6.3x slower |
+| Qwen3.5 4.2B | 4.2B (Q4_K_M) | Ollama GGUF | 67.3 | 52.8 | 193 ms | 252 ms | 5.0x slower |
+| Qwen3.5 4B | 4B (bf16) | vLLM bf16 | 67.1 | 50.5 | 242 ms | 305 ms | 6.3x slower |
+| Gemma 4 25B | 25B (Q4_K_M) | Ollama GGUF | 64.8 | 56.6 | 201 ms | 256 ms | 5.2x slower |
+| Qwen3.5 9.7B | 9.7B (Q4_K_M) | Ollama GGUF | 63.6 | 51.6 | 229 ms | 273 ms | 5.9x slower |
+| Gemma 4 E2B | E2B (bf16) | vLLM bf16 | 58.4 | 23.6 | 155 ms | 210 ms | 4.0x slower |
+| Qwen3.5 2B | 2B (bf16) | vLLM bf16 | 57.5 | 23.0 | 149 ms | 202 ms | 3.9x slower |
+| Gemma 4 8.0B | 8.0B (Q4_K_M) | Ollama GGUF | 57.4 | 45.0 | 171 ms | 202 ms | 4.4x slower |
+| Qwen3.5 1.9B | 1.9B (Q8_0) | Ollama GGUF | 57.4 | 24.5 | 126 ms | 144 ms | 3.3x slower |
+| Gemma 4 E4B | 7.5B (Q4_K_M) | Ollama GGUF | 57.1 | 44.1 | 146 ms | 175 ms | 3.8x slower |
+| Gemma 4 E2B | 4.6B (Q4_K_M) | Ollama GGUF | 56.9 | 22.7 | 116 ms | 139 ms | 3.0x slower |
+| Ministral 3 14B | 14B (Q4_K_M) | Ollama GGUF | 53.2 | 42.0 | 285 ms | 424 ms | 7.4x slower |
+| Qwen3.5 0.8B | 0.8B (Q8_0) | Ollama GGUF | 41.3 | 0.0 | 124 ms | 158 ms | 3.2x slower |
+| Qwen3.5 0.8B | 0.8B (bf16) | vLLM bf16 | 40.9 | 0.4 | 125 ms | 178 ms | 3.2x slower |
+<!-- /table -->
+
+Same 1,000 test steps (seed 0), same input (goal, last 3 actions, the same accessibility candidates), same InfiGUI-R1 judge, one RTX 4090 at batch 1. The generative models are used zero-shot (not trained on AndroidControl), thinking disabled, asked for a JSON action; vLLM runs them in bf16, Ollama in 4-bit GGUF. Jev is TypeSafe's hosted decision model (jev-1.13.0, measured 2026-10-07) and its latency is an API round trip. The comparison shows the speed of answering by selection versus generation; the accuracy gap also reflects that only Laya-Android was trained on this dataset.
 
 ## Model details
 

@@ -4,21 +4,25 @@ All test numbers come from one evaluation of the frozen checkpoint (epoch 2, sel
 
 ## AndroidControl-High
 
+<!-- table: AndroidControl-High: base vs fine-tuned (official evaluator) -->
 | Model | Params | Type | Grounding | Full SR |
 |---|---:|---:|---:|---:|
 | Laya base (zero-shot) | 322M | 29.0 | 11.8 | N/A |
 | **Laya-Android** | **322M** | **76.7** | **61.7** | **N/A** |
 | Δ | | +47.6 | +49.9 | |
+<!-- /table -->
 
 ### With an external reference
 
 The external row solves a different task (screen coordinates from a screenshot) and is shown only as a reference point.
 
+<!-- table: AndroidControl-High (InfiGUI-R1 evaluator, 8444 steps / 1543 episodes) -->
 | Model | Params | Input | Type | Grounding | Full SR |
 |---|---:|---|---:|---:|---:|
 | InfiGUI-R1-3B† | 3B | Screenshot | 82.7 | 74.4 | 71.1 |
 | Laya base (zero-shot) | 322M | Accessibility tree | 29.0 | 11.8 | N/A |
 | **Laya-Android** | **322M** | **Accessibility tree** | **76.7** | **61.7** | **N/A** |
+<!-- /table -->
 
 † Reported by the authors ([InfiGUI-R1](https://github.com/InfiXAI/InfiGUI-R1), arXiv:2504.14239); not reproduced by us ([source](../results/external_baselines.json)). Laya-Android selects among accessibility-derived candidates instead of predicting free coordinates, and the gold boxes come from the same accessibility tree. 6.4% of test click/long-press targets (327 / 5,083) are outside the candidate set and count as misses. Full SR is N/A because v0 does not generate `INPUT_TEXT` text or `OPEN_APP` app names. AndroidControl-Low is not evaluated (v0 was trained with the high-level goal only).
 
@@ -28,24 +32,29 @@ The reference Grounding rule accepts a click inside any of up to three gold boxe
 
 ## Base Laya → Laya-Android
 
+<!-- table: Base Laya → Laya-Android (Policy Joint Accuracy, test) -->
 | Split | Base Laya | Laya-Android | Δ |
 |---|---:|---:|---:|
 | IDD | 0.115 | **0.659** | +54.4pt |
 | App-Unseen | 0.112 | **0.540** | +42.8pt |
 | Task-Unseen | 0.108 | **0.567** | +45.9pt |
 | Category-Unseen | 0.108 | **0.545** | +43.7pt |
+<!-- /table -->
 
 ## Per split
 
+<!-- table: Per split (Laya-Android, test) -->
 | Split | Steps | Type | Grounding | Policy Joint | Target top-1 | Op macro-F1 | Candidate coverage | ECE (op) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | IDD | 3897 | 81.4 | 67.7 | 0.659 | 0.681 | 0.607 | 95.2% | 0.012 |
 | App-Unseen | 3475 | 70.8 | 53.2 | 0.540 | 0.599 | 0.502 | 93.3% | 0.055 |
 | Task-Unseen | 4464 | 72.8 | 56.5 | 0.567 | 0.629 | 0.515 | 92.3% | 0.045 |
 | Category-Unseen | 3891 | 71.5 | 54.9 | 0.545 | 0.602 | 0.509 | 93.8% | 0.049 |
+<!-- /table -->
 
 ## Target selection vs. number of candidates
 
+<!-- table: Target top-1 by candidate count (union of test steps) -->
 | Candidates | n | Base Laya | Laya-Android |
 |---|---:|---:|---:|
 | 1-5 | 547 | 0.397 | 0.839 |
@@ -53,9 +62,11 @@ The reference Grounding rule accepts a click inside any of up to three gold boxe
 | 11-20 | 2025 | 0.107 | 0.665 |
 | 21-50 | 1228 | 0.067 | 0.543 |
 | >50 | 96 | 0.021 | 0.542 |
+<!-- /table -->
 
 ## Operation recall
 
+<!-- table: Operation recall (test; n = gold support) -->
 | Operation | IDD | App-Unseen | Task-Unseen | Category-Unseen |
 |---|---:|---:|---:|---:|
 | CLICK | 0.89 (n=2445) | 0.79 (n=2024) | 0.81 (n=2583) | 0.79 (n=2241) |
@@ -69,6 +80,7 @@ The reference Grounding rule accepts a click inside any of up to three gold boxe
 | BACK | 0.56 (n=117) | 0.31 (n=211) | 0.32 (n=223) | 0.31 (n=215) |
 | WAIT | 0.41 (n=273) | 0.30 (n=226) | 0.32 (n=284) | 0.31 (n=240) |
 | DONE | 0.75 (n=721) | 0.56 (n=631) | 0.57 (n=803) | 0.55 (n=700) |
+<!-- /table -->
 
 Strong: CLICK, OPEN_APP, INPUT_TEXT. Weak: WAIT and BACK (often not inferable from the accessibility tree alone), horizontal scrolling, LONG_PRESS (157 training examples).
 
@@ -86,6 +98,7 @@ Rule ([`scripts/pick_examples.py`](../scripts/pick_examples.py)): validation ste
 
 ## Training progression (validation)
 
+<!-- table: Training progression (validation Policy Joint) -->
 | Checkpoint | Val Policy Joint |
 |---|---:|
 | Base | 0.098 |
@@ -93,6 +106,7 @@ Rule ([`scripts/pick_examples.py`](../scripts/pick_examples.py)): validation ste
 | Epoch 1 | 0.605 |
 | Epoch 2 (selected) | 0.669 |
 | Epoch 3 | 0.665 |
+<!-- /table -->
 
 ![Training progression on validation](../figures/training_progression.png)
 

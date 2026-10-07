@@ -1,4 +1,4 @@
-"""Dataset report from processed JSONL -> reports/androidcontrol_stats.json.
+"""Dataset report from processed JSONL -> results/data/androidcontrol_stats.json.
 
 Token lengths use the base model tokenizer on the exact Laya rows (serialization.row), on a seeded
 sample of up to --token-sample steps per split (tokenizing every option of 90k steps is slow).
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="multilingual")
     ap.add_argument("--token-sample", type=int, default=3000)
-    ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "reports", "androidcontrol_stats.json"))
+    ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "results", "data", "androidcontrol_stats.json"))
     args = ap.parse_args()
     from transformers import AutoTokenizer
     from laya.train import resolve_checkpoint_dir

@@ -2,12 +2,13 @@
 
 python scripts/make_figures.py
 Reads results/test/{final,base}_metrics.json, results/test/raw/*/test_*.preds.jsonl.gz, results/val/training_history.json,
-reports/{base_laya_val,smoke_val}.json, results/latency/rtx4090.json, results/external_baselines.json.
-Writes figures/*.png|svg and results/tables.md (every number shown in a figure also appears there).
+results/val/{base_laya_val,smoke_val}.json, results/latency/rtx4090.json, results/external_baselines.json.
+Writes figures/*.png|svg, results/tables.md, and rewrites every <!-- table: NAME --> block in the docs.
 """
 import gzip
 import json
 import os
+import re
 
 import matplotlib
 
@@ -127,6 +128,155 @@ def pooled_buckets(model):
     return {b: {"acc": c / n if n else None, "n": n} for b, (c, n) in hit.items()}
 
 
+SERVING_COLOR = {"Laya-Android (local)": OURS, "vLLM bf16": BASE, "Ollama GGUF": "#1baf7a", "TypeSafe API": "#eda100"}
+DOC_FILES = ["README.md", "MODEL_CARD.md", "docs/results.md", "docs/benchmark.md", "docs/training.md"]
+
+
+def tidy_size(p):
+    """'752.39M' -> '0.8B', '25.2B' -> '25B', '4.2B' -> '4.2B'."""
+    m = re.match(r"([0-9.]+)([MB])", p or "")
+    if not m:
+        return p or ""
+    b = float(m.group(1)) / (1000 if m.group(2) == "M" else 1)
+    return ("%.0fB" % b) if b >= 10 else ("%.1fB" % b)
+
+
+def short_name(key):
+    name = key.split(":", 1)[1] if key.startswith(("ollama:", "jev:")) else key
+    return name.split("/")[-1].replace("-Instruct", "").replace("-it", "")
+
+
+def baseline_rows():
+    """Valid same-input results: dicts with name, params, serving, type, grounding, latency (median/p95)."""
+    if not os.path.exists(os.path.join(R, "baselines", "same_input_1000.json")):
+        return [], []
+    models = dict(load("results", "baselines", "same_input_1000.json")["models"])
+    if os.path.exists(os.path.join(R, "baselines", "jev_1000.json")):
+        models.update(load("results", "baselines", "jev_1000.json")["models"])
+    rows, excluded = [], []
+    for key, m in models.items():
+        if "error" in m or m.get("unparseable", 0) > 500 or m.get("errors", 0) > 500:
+            excluded.append((short_name(key), m.get("error", "most answers unparseable (reasoning cut by the token limit)")[:90]))
+            continue
+        if key.startswith("Laya-Android"):
+            serving, params, lat = "Laya-Android (local)", "322M", m["latency_ms"]
+        elif key.startswith("jev:"):
+            serving, params, lat = "TypeSafe API", "undisclosed", m["latency_ms_api_roundtrip"]
+        elif key.startswith("ollama:"):
+            serving, params, lat = "Ollama GGUF", "%s (%s)" % (tidy_size(m.get("params")), m.get("quantization")), m["latency_ms"]
+        else:
+            size = re.search(r"-(E?[0-9.]+B)", key)
+            serving, params, lat = "vLLM bf16", "%s (bf16)" % (size.group(1) if size else "?"), m["latency_ms"]
+        name = "Laya-Android" if key.startswith("Laya") else short_name(key)
+        if key.startswith("ollama:"):  # canonical name from the tag's model line + reported size (not the local tag)
+            base = key.split(":")[1]
+            fam = {"qwen3.5": "Qwen3.5", "qwen3.8": "Qwen3.8", "gemma4": "Gemma 4", "ministral-3": "Ministral 3",
+                   "gpt-oss": "gpt-oss"}.get(base, base)
+            tagsize = key.split(":")[2] if key.count(":") >= 2 else ""
+            name = "%s %s" % (fam, tagsize.upper() if re.fullmatch(r"e\d+b", tagsize) else tidy_size(m.get("params")))
+        if serving == "vLLM bf16":
+            nm = key.split("/")[-1].replace("-it", "").replace("-Instruct", "")
+            nm = re.sub(r"^gemma-4", "Gemma 4", nm)
+            name = re.sub(r"-(E?[0-9.]+B)$", lambda mm: " " + mm.group(1), nm)
+        rows.append({"name": name, "params": params,
+                     "serving": serving, "type": m["type"], "grounding": m["grounding"], "lat": lat, "raw": m})
+    rows.sort(key=lambda r: (r["serving"] != "Laya-Android (local)", -r["type"]))
+    return rows, excluded
+
+
+def draw_comparison(rows):
+    """Leaderboard: one row per model (sorted by Type), accuracy left, latency right; only Laya-Android in color."""
+    rows = sorted(rows, key=lambda r: (r["name"] != "Laya-Android", -r["type"]))
+    tag = {"Laya-Android (local)": "322M · local", "vLLM bf16": "vLLM bf16", "Ollama GGUF": "Ollama 4-bit",
+           "TypeSafe API": "API"}
+    labels = ["%s  (%s)" % (r["name"], tag[r["serving"]]) for r in rows]
+    colors = [OURS if r["name"] == "Laya-Android" else "#b9b8b1" for r in rows]
+    n = len(rows)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11.5, 0.42 * n + 1.6), sharey=True,
+                                 gridspec_kw={"width_ratios": [1, 1.25], "wspace": 0.06})
+    y = list(range(n))[::-1]
+    a1.barh(y, [r["type"] for r in rows], height=0.62, color=colors, edgecolor=SURFACE)
+    for yy, r in zip(y, rows):
+        a1.text(r["type"] + 0.8, yy, "%.1f" % r["type"], va="center", fontsize=9,
+                color=INK, weight="bold" if r["name"] == "Laya-Android" else "normal")
+    a1.set_xlim(0, 100)
+    a1.set_yticks(y)
+    a1.set_yticklabels(labels, fontsize=9.5)
+    for lbl in a1.get_yticklabels():
+        if lbl.get_text().startswith("Laya-Android"):
+            lbl.set_weight("bold")
+            lbl.set_color(OURS)
+    style(a1, "", "Accuracy: AndroidControl-High Type")
+    a1.yaxis.grid(False)
+    a1.xaxis.grid(True, color=GRID, linewidth=0.8)
+    laya = next(r for r in rows if r["name"] == "Laya-Android")["lat"]["median"]
+    med = [r["lat"]["median"] for r in rows]
+    a2.barh(y, med, height=0.62, color=colors, edgecolor=SURFACE)
+    a2.errorbar(med, y, xerr=[[0] * n, [r["lat"]["p95"] - r["lat"]["median"] for r in rows]], fmt="none",
+                ecolor=MUTED, capsize=3, linewidth=1)
+    for yy, r in zip(y, rows):
+        txt = "%.0f ms" % r["lat"]["median"] if r["name"] == "Laya-Android" else \
+            "%.0f ms  · %.1f× slower" % (r["lat"]["median"], r["lat"]["median"] / laya)
+        a2.text(r["lat"]["p95"] + max(med) * 0.02, yy, txt, va="center", fontsize=9,
+                color=OURS if r["name"] == "Laya-Android" else INK, weight="bold" if r["name"] == "Laya-Android" else "normal")
+    a2.set_xlim(0, max(r["lat"]["p95"] for r in rows) * 1.45)
+    style(a2, "", "Latency per decision (median, whisker = p95)")
+    a2.yaxis.grid(False)
+    a2.xaxis.grid(True, color=GRID, linewidth=0.8)
+    a2.set_xlabel("ms (RTX 4090, batch 1; API = network round trip)", color=MUTED, fontsize=9)
+    a1.set_xlabel("Type accuracy, 1,000 test steps", color=MUTED, fontsize=9)
+    for a in (a1, a2):
+        a.tick_params(axis="y", length=0)
+    for ext in ("png", "svg"):  # bbox="tight" keeps the long model names; tight_layout cannot with shared axes
+        fig.savefig(os.path.join(FIG, "efficiency_comparison.%s" % ext), dpi=160, bbox_inches="tight", pad_inches=0.25)
+    plt.close(fig)
+
+
+def draw_scatter(rows):
+    """Plain scatter: latency (log) vs Type; marker shape = serving; labels placed without overlap."""
+    import math
+    markers = {"Laya-Android (local)": "o", "vLLM bf16": "s", "Ollama GGUF": "^", "TypeSafe API": "D"}
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for serving, mk in markers.items():
+        pts = [r for r in rows if r["serving"] == serving]
+        if not pts:
+            continue
+        ours = serving.startswith("Laya")
+        ax.scatter([r["lat"]["median"] for r in pts], [r["type"] for r in pts], marker=mk, s=70 if ours else 46,
+                   color=OURS if ours else "#8f8e88", edgecolor=SURFACE, linewidth=1, zorder=3,
+                   label={"Laya-Android (local)": "Laya-Android (in-process)", "TypeSafe API": "TypeSafe Jev (API round trip)"
+                          }.get(serving, serving))
+    from adjustText import adjust_text
+    texts = [ax.text(r["lat"]["median"], r["type"], r["name"], fontsize=8,
+                     color=OURS if r["name"] == "Laya-Android" else INK) for r in rows]
+    lats = [r["lat"]["median"] for r in rows]
+    ax.set_xscale("log")
+    ticks = [t for t in (20, 30, 50, 100, 200, 300, 500, 1000, 2000, 5000) if min(lats) / 1.5 <= t <= max(lats) * 1.6]
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([str(t) for t in ticks])
+    ax.minorticks_off()
+    ax.set_xlim(min(lats) / 1.4, max(lats) * 1.6)
+    ax.xaxis.grid(True, color=GRID, linewidth=0.8)
+    ax.set_xlabel("Median latency per decision (ms, log scale), RTX 4090, batch 1", color=INK)
+    ax.legend(frameon=False, fontsize=8, loc="lower right", labelcolor=INK)
+    style(ax, "Type accuracy (%)", "Type accuracy vs. latency (AndroidControl-High, 1,000 test steps)")
+    adjust_text(texts, ax=ax, expand=(1.15, 1.4), arrowprops=dict(arrowstyle="-", color=GRID, lw=0.6))
+    save(fig, "efficiency_scatter")
+
+
+def sync_docs(sections):
+    """Rewrite every <!-- table: NAME --> ... <!-- /table --> block in the docs with the freshly generated table."""
+    import re
+    for f in DOC_FILES:
+        path = os.path.join(ROOT, f)
+        s = open(path, encoding="utf8").read()
+        s2 = re.sub(r"(<!-- table: (.+?) -->\n).*?(\n<!-- /table -->)",
+                    lambda m: m.group(1) + sections[m.group(2)] + m.group(3) if m.group(2) in sections else m.group(0),
+                    s, flags=re.S)
+        if s2 != s:
+            open(path, "w", encoding="utf8").write(s2)
+
+
 def main():
     os.makedirs(FIG, exist_ok=True)
     plt.rcParams.update({"font.size": 10, "figure.facecolor": SURFACE, "savefig.facecolor": SURFACE,
@@ -134,7 +284,7 @@ def main():
     fin, base = load("results", "test", "final_metrics.json"), load("results", "test", "base_metrics.json")
     fi, bi = fin["internal"]["splits"], base["internal"]["splits"]
     hist = load("results", "val", "training_history.json")
-    bval, sval = load("reports", "base_laya_val.json")["splits"]["val"], load("reports", "smoke_val.json")["splits"]["val"]
+    bval, sval = load("results", "val", "base_laya_val.json")["splits"]["val"], load("results", "val", "smoke_val.json")["splits"]["val"]
     lat = load("results", "latency", "rtx4090.json")
     ext = load("results", "external_baselines.json")
 
@@ -251,8 +401,35 @@ def main():
         T.append("| %s | " % op + " | ".join("%.2f (n=%d)" % (fi[s]["op_per_class"][op]["recall"], fi[s]["op_per_class"][op]["n_gold"])
                                             if op in fi[s]["op_per_class"] and fi[s]["op_per_class"][op]["n_gold"] else "–"
                                             for s, _ in SPLITS) + " |")
+    rows, excluded = baseline_rows()
+    if rows:
+        draw_comparison(rows)
+        draw_scatter(rows)
+        laya_ms = next(r["lat"]["median"] for r in rows if r["name"] == "Laya-Android")
+        T += ["", "### Same-input comparison (1,000 test steps)", "",
+              "| Model | Params | Serving | Type | Grounding | Median latency | p95 | vs Laya-Android |",
+              "|---|---|---|---:|---:|---:|---:|---:|"]
+        for r in rows:
+            b = "**" if r["name"] == "Laya-Android" else ""
+            T.append("| %s%s%s | %s | %s | %s%.1f%s | %s%.1f%s | %s%.0f ms%s | %.0f ms | %s |" % (
+                b, r["name"], b, r["params"], r["serving"], b, r["type"], b, b, r["grounding"], b, b,
+                r["lat"]["median"], b, r["lat"]["p95"],
+                "1x" if r["name"] == "Laya-Android" else "%.1fx slower" % (r["lat"]["median"] / laya_ms)))
+        jev = next((r for r in rows if r["serving"] == "TypeSafe API"), None)
+        if jev:
+            lc = jev["raw"]["laya_android_same_steps"]
+            T += ["", "### Calibration vs Jev (same 1,000 steps, operation question)", "",
+                  "| Model | ECE (lower is better) | Brier (lower is better) |", "|---|---:|---:|",
+                  "| **Laya-Android** | **%.3f** | **%.3f** |" % (lc["ece_operation"], lc["brier_operation"]),
+                  "| %s | %.3f | %.3f |" % (jev["name"], jev["raw"]["ece_operation"], jev["raw"]["brier_operation"])]
+        if excluded:
+            T += ["", "### Excluded from the comparison", "", "| Model | Reason |", "|---|---|"]
+            T += ["| %s | %s |" % e for e in excluded]
     with open(os.path.join(R, "tables.md"), "w", encoding="utf8") as f:
         f.write("\n".join(T) + "\n")
+    import re
+    sync_docs({m.group(1).strip(): m.group(2).strip()
+               for m in re.finditer(r"^### (.+?)\n\n(\|.*?)(?=\n\n|\Z)", "\n".join(T), re.S | re.M)})
     print("\n".join(T))
 
 

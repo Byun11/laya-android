@@ -21,3 +21,4 @@ hf_staging/
 # local agent/tool state
 .omc/
 .claude/
+PROGRESS.md

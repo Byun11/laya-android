@@ -20,7 +20,7 @@ AndroidControl only, official `splits.json` / `test_subsplits.json`. Screenshots
 - train: 13,594 episodes / 74,714 actions (9 zero-action episodes excluded), plus one synthetic `DONE` per episode → 88,308 steps, 132,448 training items (operation and target questions)
 - validation: 137 episodes / 690 actions (827 steps)
 - test: four official subsplits (IDD, App-Unseen, Task-Unseen, Category-Unseen), overlapping by design
-- statistics: [`reports/androidcontrol_stats.json`](../reports/androidcontrol_stats.json)
+- statistics: [`results/data/androidcontrol_stats.json`](../results/data/androidcontrol_stats.json)
 
 ## Candidates and grounding ([`src/candidates.py`](../src/candidates.py))
 

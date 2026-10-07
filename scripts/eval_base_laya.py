@@ -1,4 +1,4 @@
-"""Zero-shot base Laya on the same harness: python scripts/eval_base_laya.py --out reports/base_laya_eval.json"""
+"""Zero-shot base Laya on the same harness: python scripts/eval_base_laya.py --out results/test/internal_base_laya.json"""
 import os
 import sys
 
