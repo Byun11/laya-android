@@ -111,8 +111,8 @@
 |---|---|---|---:|---:|---:|---:|---:|
 | **Laya-Android** | 322M | Laya-Android (local) | **77.2** | **62.8** | **39 ms** | 48 ms | 1x |
 | Qwen3.8 27B | 27B (Q4_K_M) | Ollama GGUF | 76.8 | 64.5 | 575 ms | 694 ms | 14.9x slower |
-| jev-1.13.0 | undisclosed | TypeSafe API | 67.6 | 56.4 | 244 ms | 308 ms | 6.3x slower |
 | Qwen3.5 4.2B | 4.2B (Q4_K_M) | Ollama GGUF | 67.3 | 52.8 | 193 ms | 252 ms | 5.0x slower |
+| jev-1.13.0 | undisclosed | TypeSafe API | 67.2 | 56.7 | 236 ms | 295 ms | 6.1x slower |
 | Qwen3.5 4B | 4B (bf16) | vLLM bf16 | 67.1 | 50.5 | 242 ms | 305 ms | 6.3x slower |
 | Gemma 4 25B | 25B (Q4_K_M) | Ollama GGUF | 64.8 | 56.6 | 201 ms | 256 ms | 5.2x slower |
 | Qwen3.5 9.7B | 9.7B (Q4_K_M) | Ollama GGUF | 63.6 | 51.6 | 229 ms | 273 ms | 5.9x slower |
@@ -126,9 +126,20 @@
 | Qwen3.5 0.8B | 0.8B (Q8_0) | Ollama GGUF | 41.3 | 0.0 | 124 ms | 158 ms | 3.2x slower |
 | Qwen3.5 0.8B | 0.8B (bf16) | vLLM bf16 | 40.9 | 0.4 | 125 ms | 178 ms | 3.2x slower |
 
+### Laya-Android vs Jev (same 1,000 test steps)
+
+| | Laya-Android (322M, local) | Jev 1.13.0 (TypeSafe API) |
+|---|---:|---:|
+| Type | **77.2** | 67.2 |
+| Grounding | **62.8** | 56.7 |
+| Operation ECE (lower is better) | **0.037** | 0.066 |
+| Operation Brier (lower is better) | **0.338** | 0.487 |
+| Target ECE (lower is better) | **0.061** | 0.140 |
+| Median latency | **39 ms** (RTX 4090) | 236 ms (API round trip) |
+
 ### Calibration vs Jev (same 1,000 steps, operation question)
 
 | Model | ECE (lower is better) | Brier (lower is better) |
 |---|---:|---:|
 | **Laya-Android** | **0.037** | **0.338** |
-| jev-1.13.0 | 0.055 | 0.483 |
+| jev-1.13.0 | 0.067 | 0.487 |

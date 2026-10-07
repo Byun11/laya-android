@@ -68,8 +68,8 @@ Scripts: [`bench_vllm.py`](../scripts/bench_vllm.py), [`bench_ollama.py`](../scr
 |---|---|---|---:|---:|---:|---:|---:|
 | **Laya-Android** | 322M | Laya-Android (local) | **77.2** | **62.8** | **39 ms** | 48 ms | 1x |
 | Qwen3.8 27B | 27B (Q4_K_M) | Ollama GGUF | 76.8 | 64.5 | 575 ms | 694 ms | 14.9x slower |
-| jev-1.13.0 | undisclosed | TypeSafe API | 67.6 | 56.4 | 244 ms | 308 ms | 6.3x slower |
 | Qwen3.5 4.2B | 4.2B (Q4_K_M) | Ollama GGUF | 67.3 | 52.8 | 193 ms | 252 ms | 5.0x slower |
+| jev-1.13.0 | undisclosed | TypeSafe API | 67.2 | 56.7 | 236 ms | 295 ms | 6.1x slower |
 | Qwen3.5 4B | 4B (bf16) | vLLM bf16 | 67.1 | 50.5 | 242 ms | 305 ms | 6.3x slower |
 | Gemma 4 25B | 25B (Q4_K_M) | Ollama GGUF | 64.8 | 56.6 | 201 ms | 256 ms | 5.2x slower |
 | Qwen3.5 9.7B | 9.7B (Q4_K_M) | Ollama GGUF | 63.6 | 51.6 | 229 ms | 273 ms | 5.9x slower |
@@ -88,11 +88,15 @@ Same 1,000 test steps (seed 0), same input (goal, last 3 actions, the same acces
 
 The vLLM runs of Qwen3.5-9B, Gemma-4-E4B and LFM2.5-1.2B were not completed and are not reported; Qwen3.5-9B and Gemma-4-E4B are covered by the Ollama runs.
 
+Jev 1.13.0 was measured twice with identical requests; the reported run saved per-step probabilities. Jev is not fully deterministic: an earlier run with the same requests gave Type 67.6, Grounding 56.4 and operation ECE 0.055 (raw: [`results/baselines/`](../results/baselines/)).
+
+![Reliability diagram, Laya-Android vs Jev](../figures/calibration_vs_jev.png)
+
 <!-- table: Calibration vs Jev (same 1,000 steps, operation question) -->
 | Model | ECE (lower is better) | Brier (lower is better) |
 |---|---:|---:|
 | **Laya-Android** | **0.037** | **0.338** |
-| jev-1.13.0 | 0.055 | 0.483 |
+| jev-1.13.0 | 0.067 | 0.487 |
 <!-- /table -->
 
 

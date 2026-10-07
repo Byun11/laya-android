@@ -4004,21 +4004,21 @@
  "models": {
   "jev:jev-1.13.0": {
    "serving": "TypeSafe API (jev-1.13.0)",
-   "type": 67.2,
-   "grounding": 56.7,
+   "type": 67.6,
+   "grounding": 56.4,
    "errors": 0,
    "latency_ms_api_roundtrip": {
-    "median": 236.5,
-    "p95": 295.3,
-    "mean": 244.4
+    "median": 243.5,
+    "p95": 308.1,
+    "mean": 250.5
    },
-   "ece_operation": 0.0665,
-   "brier_operation": 0.4866,
+   "ece_operation": 0.0546,
+   "brier_operation": 0.483,
    "usage_tokens": {
     "input": 1155647,
-    "output": 245267
+    "output": 245269
    },
-   "measured_at": "2026-10-07 19:24",
+   "measured_at": "2026-10-07 17:48",
    "laya_android_same_steps": {
     "ece_operation": 0.0372,
     "brier_operation": 0.3382

@@ -241,14 +241,15 @@ def draw_scatter(rows):
         pts = [r for r in rows if r["serving"] == serving]
         if not pts:
             continue
-        ours = serving.startswith("Laya")
-        ax.scatter([r["lat"]["median"] for r in pts], [r["type"] for r in pts], marker=mk, s=70 if ours else 46,
-                   color=OURS if ours else "#8f8e88", edgecolor=SURFACE, linewidth=1, zorder=3,
+        ours, jev = serving.startswith("Laya"), serving == "TypeSafe API"
+        ax.scatter([r["lat"]["median"] for r in pts], [r["type"] for r in pts], marker=mk, s=75 if ours or jev else 46,
+                   color=OURS if ours else "#eda100" if jev else "#8f8e88", edgecolor=SURFACE, linewidth=1, zorder=3,
                    label={"Laya-Android (local)": "Laya-Android (in-process)", "TypeSafe API": "TypeSafe Jev (API round trip)"
                           }.get(serving, serving))
     from adjustText import adjust_text
-    texts = [ax.text(r["lat"]["median"], r["type"], r["name"], fontsize=8,
-                     color=OURS if r["name"] == "Laya-Android" else INK) for r in rows]
+    texts = [ax.text(r["lat"]["median"], r["type"], r["name"], fontsize=8.5 if r["serving"] in ("Laya-Android (local)", "TypeSafe API") else 8,
+                     color=OURS if r["name"] == "Laya-Android" else "#b07800" if r["serving"] == "TypeSafe API" else INK,
+                     weight="bold" if r["serving"] in ("Laya-Android (local)", "TypeSafe API") else "normal") for r in rows]
     lats = [r["lat"]["median"] for r in rows]
     ax.set_xscale("log")
     ticks = [t for t in (20, 30, 50, 100, 200, 300, 500, 1000, 2000, 5000) if min(lats) / 1.5 <= t <= max(lats) * 1.6]
@@ -262,6 +263,68 @@ def draw_scatter(rows):
     style(ax, "Type accuracy (%)", "Type accuracy vs. latency (AndroidControl-High, 1,000 test steps)")
     adjust_text(texts, ax=ax, expand=(1.15, 1.4), arrowprops=dict(arrowstyle="-", color=GRID, lw=0.6))
     save(fig, "efficiency_scatter")
+
+
+def calibration_points(probs_gold, bins=15):  # same 15 bins as eval_laya_android.calib
+    """[(mean confidence, accuracy, n)] per confidence bin, plus ECE, from [(prob vector, gold index)]."""
+    import numpy as np
+    conf = np.array([p.max() for p, _ in probs_gold])
+    hit = np.array([int(p.argmax()) == g for p, g in probs_gold], dtype=float)
+    idx = np.minimum((conf * bins).astype(int), bins - 1)
+    pts = [(conf[idx == b].mean(), hit[idx == b].mean(), int((idx == b).sum())) for b in range(bins) if (idx == b).any()]
+    ece = sum(abs(c - a) * n for c, a, n in pts) / len(conf)
+    brier = float(np.mean([((p - np.eye(len(p))[g]) ** 2).sum() for p, g in probs_gold]))
+    return pts, ece, brier
+
+
+def jev_vs_laya():
+    """Per-step operation and target probabilities of Laya-Android and Jev on the same 1,000 steps."""
+    import numpy as np
+    path = os.path.join(R, "baselines", "jev_1000_steps.jsonl.gz")
+    if not os.path.exists(path):
+        return None
+    ops = list(load("results", "test", "internal_laya_android.json")["splits"]["test_idd"]["op_per_class"])
+    from_laya = {}
+    for s_, _ in SPLITS:
+        with gzip.open(os.path.join(R, "test", "raw", "laya_android", s_ + ".preds.jsonl.gz"), "rt", encoding="utf8") as f:
+            for line in f:
+                q = json.loads(line)
+                from_laya[(q["episode_id"], q["step"])] = q
+    out = {"Laya-Android": {"op": [], "tgt": []}, "Jev": {"op": [], "tgt": []}}
+    with gzip.open(path, "rt", encoding="utf8") as f:
+        for line in f:
+            j = json.loads(line)
+            lq = from_laya[(j["episode_id"], j["step"])]
+            allops = list(j["operation_probs"])
+            g = allops.index(j["operation_gold"])
+            out["Jev"]["op"].append((np.array([j["operation_probs"][o] for o in allops]), g))
+            out["Laya-Android"]["op"].append((np.array([lq["operation_probs"][o] for o in allops]), g))
+            if j["target_gold"] is not None and j["target_probs"] and lq["target_probs"]:
+                k = len(lq["target_probs"])
+                out["Jev"]["tgt"].append((np.array([j["target_probs"].get(str(i), 0.0) for i in range(k)]), j["target_gold"]))
+                out["Laya-Android"]["tgt"].append((np.array(lq["target_probs"]), j["target_gold"]))
+    return out
+
+
+def draw_reliability(cal):
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.4), sharey=True)
+    for ax, (q, title) in zip(axes, (("op", "Operation question"), ("tgt", "Target question"))):
+        ax.plot([0, 1], [0, 1], ls="--", lw=1, color=MUTED, label="perfect calibration")
+        for name, color in (("Laya-Android", OURS), ("Jev", "#eda100")):
+            pts, ece, _ = calibration_points(cal[name][q])
+            pts = [p_ for p_ in pts if p_[2] >= 10]  # bins with < 10 samples are noise; ECE above uses every bin
+            ax.plot([c for c, _, _ in pts], [a for _, a, _ in pts], color=color, lw=2, label="%s (ECE %.3f)" % (name, ece))
+            ax.scatter([c for c, _, _ in pts], [a for _, a, _ in pts], s=[8 + n / 3 for _, _, n in pts], color=color,
+                       edgecolor=SURFACE, linewidth=1, zorder=3)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.set_xlabel("Predicted confidence (top choice)", color=INK)
+        style(ax, "Observed accuracy" if q == "op" else "", "%s (n=%d steps)" % (title, len(cal["Jev"][q])))
+        ax.text(0.98, 0.03, "marker size = steps in bin; bins with < 10 steps omitted", transform=ax.transAxes,
+                ha="right", fontsize=7.5, color=MUTED)
+        ax.xaxis.grid(True, color=GRID, linewidth=0.8)
+        ax.legend(frameon=False, fontsize=8.5, loc="upper left", labelcolor=INK)
+    save(fig, "calibration_vs_jev")
 
 
 def sync_docs(sections):
@@ -416,6 +479,22 @@ def main():
                 r["lat"]["median"], b, r["lat"]["p95"],
                 "1x" if r["name"] == "Laya-Android" else "%.1fx slower" % (r["lat"]["median"] / laya_ms)))
         jev = next((r for r in rows if r["serving"] == "TypeSafe API"), None)
+        cal = jev_vs_laya()
+        if jev and cal:
+            draw_reliability(cal)
+            lr = next(r for r in rows if r["name"] == "Laya-Android")
+            m = {n: {q: calibration_points(cal[n][q]) for q in ("op", "tgt")} for n in ("Laya-Android", "Jev")}
+            T += ["", "### Laya-Android vs Jev (same 1,000 test steps)", "",
+                  "| | Laya-Android (322M, local) | Jev 1.13.0 (TypeSafe API) |", "|---|---:|---:|",
+                  "| Type | **%.1f** | %.1f |" % (lr["type"], jev["type"]),
+                  "| Grounding | **%.1f** | %.1f |" % (lr["grounding"], jev["grounding"]),
+                  "| Operation ECE (lower is better) | **%.3f** | %.3f |" % (m["Laya-Android"]["op"][1], m["Jev"]["op"][1]),
+                  "| Operation Brier (lower is better) | **%.3f** | %.3f |" % (m["Laya-Android"]["op"][2], m["Jev"]["op"][2]),
+                  "| Target ECE (lower is better) | %s%.3f%s | %s%.3f%s |" % (
+                      *(("**", m["Laya-Android"]["tgt"][1], "**", "", m["Jev"]["tgt"][1], "")
+                        if m["Laya-Android"]["tgt"][1] <= m["Jev"]["tgt"][1] else
+                        ("", m["Laya-Android"]["tgt"][1], "", "**", m["Jev"]["tgt"][1], "**")),),
+                  "| Median latency | **%.0f ms** (RTX 4090) | %.0f ms (API round trip) |" % (lr["lat"]["median"], jev["lat"]["median"])]
         if jev:
             lc = jev["raw"]["laya_android_same_steps"]
             T += ["", "### Calibration vs Jev (same 1,000 steps, operation question)", "",

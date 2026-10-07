@@ -70,6 +70,7 @@ if __name__ == "__main__":
     keys, ref, steps = load_subset(args.reference)
     keys = keys[:WARMUP + args.limit] if args.limit else keys
     rows, lat, cal, tok_in, tok_out, errors = [], [], [], 0, 0, 0
+    per_step = []  # per-step probabilities, for reliability diagrams
     for i, k in enumerate(keys):
         it = steps[k]
         try:
@@ -93,6 +94,10 @@ if __name__ == "__main__":
         lat.append(dt)
         p = ans["operation"].get("probabilities", {})
         cal.append((np.array([p.get(o, 0.0) for o in OPS]), OPS.index(it["operation_gold"])))
+        per_step.append({"episode_id": k[0], "step": k[1], "operation_gold": it["operation_gold"],
+                         "operation_probs": {o: p.get(o, 0.0) for o in OPS},
+                         "target_gold": it["target_gold"] if it["target_groundable"] else None,
+                         "target_probs": ans.get("target", {}).get("probabilities")})
         u = out.get("usage", {})
         tok_in += u.get("input_tokens", 0)
         tok_out += u.get("output_tokens", 0)
@@ -108,6 +113,10 @@ if __name__ == "__main__":
     l_ece, l_brier = calib([(p, OPS.index(steps[k]["operation_gold"])) for p, k in lp])
     res["laya_android_same_steps"] = {"ece_operation": l_ece, "brier_operation": l_brier}
     print(json.dumps(res), flush=True)
+    if not args.limit:
+        with gzip.open(args.out.replace(".json", "_steps.jsonl.gz"), "wt", encoding="utf8") as f:
+            for r in per_step:
+                f.write(json.dumps(r) + "\n")
     if not args.limit:  # own file: the Ollama run rewrites same_input_1000.json while it is running
         with open(args.out, "w") as f:
             json.dump({"subset_keys": [list(k) for k in lk], "models": {"jev:" + args.model: res}}, f, indent=1)

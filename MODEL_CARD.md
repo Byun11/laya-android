@@ -81,30 +81,22 @@ print(out["answers"]["operation"]["choice"], out["answers"]["target"]["choice"])
 
 Candidate labels must follow the repository's `src/candidates.py` / `src/serialization.py` (`"<text> (<class>) <flags>"`).
 
-## Evaluation
+## Compared with Jev (same API, same 1,000 test steps)
 
-AndroidControl-High, 8,444 test steps, public InfiGUI-R1 evaluator. Same model before and after fine-tuning:
-
-<!-- table: AndroidControl-High: base vs fine-tuned (official evaluator) -->
-| Model | Params | Type | Grounding | Full SR |
-|---|---:|---:|---:|---:|
-| Laya base (zero-shot) | 322M | 29.0 | 11.8 | N/A |
-| **Laya-Android** | **322M** | **76.7** | **61.7** | **N/A** |
-| Δ | | +47.6 | +49.9 | |
+<!-- table: Laya-Android vs Jev (same 1,000 test steps) -->
+| | Laya-Android (322M, local) | Jev 1.13.0 (TypeSafe API) |
+|---|---:|---:|
+| Type | **77.2** | 67.2 |
+| Grounding | **62.8** | 56.7 |
+| Operation ECE (lower is better) | **0.037** | 0.066 |
+| Operation Brier (lower is better) | **0.338** | 0.487 |
+| Target ECE (lower is better) | **0.061** | 0.140 |
+| Median latency | **39 ms** (RTX 4090) | 236 ms (API round trip) |
 <!-- /table -->
 
-Full SR is N/A (v0 does not generate text or app names). Screenshot VLMs on the same evaluator report higher numbers (e.g. InfiGUI-R1-3B 82.7 / 74.4) but solve a different task (pixel coordinates vs. choosing accessibility candidates).
+![Reliability diagram, Laya-Android vs Jev](figures/calibration_vs_jev.png)
 
-<!-- table: Base Laya → Laya-Android (Policy Joint Accuracy, test) -->
-| Split | Base Laya | Laya-Android | Δ |
-|---|---:|---:|---:|
-| IDD | 0.115 | **0.659** | +54.4pt |
-| App-Unseen | 0.112 | **0.540** | +42.8pt |
-| Task-Unseen | 0.108 | **0.567** | +45.9pt |
-| Category-Unseen | 0.108 | **0.545** | +43.7pt |
-<!-- /table -->
-
-Policy Joint = operation correct and, for clicks, the gold element chosen (internal metric, not SR). One test pass of the frozen checkpoint; protocol fixed before scoring ([eval_protocol.md](https://github.com/Byun11/laya-android/blob/main/docs/eval_protocol.md)).
+Byte-identical requests to both models. Jev 1.13.0 via the TypeSafe API (2026-10-07), a general decision model not trained on AndroidControl; its latency is an API round trip.
 
 ## Compared with generative models
 
@@ -115,8 +107,8 @@ Policy Joint = operation correct and, for clicks, the gold element chosen (inter
 |---|---|---|---:|---:|---:|---:|---:|
 | **Laya-Android** | 322M | Laya-Android (local) | **77.2** | **62.8** | **39 ms** | 48 ms | 1x |
 | Qwen3.8 27B | 27B (Q4_K_M) | Ollama GGUF | 76.8 | 64.5 | 575 ms | 694 ms | 14.9x slower |
-| jev-1.13.0 | undisclosed | TypeSafe API | 67.6 | 56.4 | 244 ms | 308 ms | 6.3x slower |
 | Qwen3.5 4.2B | 4.2B (Q4_K_M) | Ollama GGUF | 67.3 | 52.8 | 193 ms | 252 ms | 5.0x slower |
+| jev-1.13.0 | undisclosed | TypeSafe API | 67.2 | 56.7 | 236 ms | 295 ms | 6.1x slower |
 | Qwen3.5 4B | 4B (bf16) | vLLM bf16 | 67.1 | 50.5 | 242 ms | 305 ms | 6.3x slower |
 | Gemma 4 25B | 25B (Q4_K_M) | Ollama GGUF | 64.8 | 56.6 | 201 ms | 256 ms | 5.2x slower |
 | Qwen3.5 9.7B | 9.7B (Q4_K_M) | Ollama GGUF | 63.6 | 51.6 | 229 ms | 273 ms | 5.9x slower |
@@ -132,6 +124,23 @@ Policy Joint = operation correct and, for clicks, the gold element chosen (inter
 <!-- /table -->
 
 Same 1,000 test steps (seed 0), same input (goal, last 3 actions, the same accessibility candidates), same InfiGUI-R1 judge, one RTX 4090 at batch 1. The generative models are used zero-shot (not trained on AndroidControl), thinking disabled, asked for a JSON action; vLLM runs them in bf16, Ollama in 4-bit GGUF. Jev is TypeSafe's hosted decision model (jev-1.13.0, measured 2026-10-07) and its latency is an API round trip. The comparison shows the speed of answering by selection versus generation; the accuracy gap also reflects that only Laya-Android was trained on this dataset.
+
+## Full test set (official evaluator)
+
+AndroidControl-High, 8,444 test steps, public InfiGUI-R1 evaluator. Same model before and after fine-tuning:
+
+<!-- table: AndroidControl-High: base vs fine-tuned (official evaluator) -->
+| Model | Params | Type | Grounding | Full SR |
+|---|---:|---:|---:|---:|
+| Laya base (zero-shot) | 322M | 29.0 | 11.8 | N/A |
+| **Laya-Android** | **322M** | **76.7** | **61.7** | **N/A** |
+| Δ | | +47.6 | +49.9 | |
+<!-- /table -->
+
+Full SR is N/A (v0 does not generate text or app names). Screenshot VLMs on the same evaluator report higher numbers (e.g. InfiGUI-R1-3B 82.7 / 74.4) but solve a different task (pixel coordinates vs. choosing accessibility candidates).
+
+
+One test pass of the frozen checkpoint; protocol fixed before scoring ([eval_protocol.md](https://github.com/Byun11/laya-android/blob/main/docs/eval_protocol.md)).
 
 ## Model details
 
