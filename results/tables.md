@@ -8,6 +8,14 @@
 | Laya base (zero-shot) | 322M | Accessibility tree | 29.0 | 11.8 | N/A |
 | **Laya-Android** | **322M** | **Accessibility tree** | **76.7** | **61.7** | **N/A** |
 
+### AndroidControl-High: base vs fine-tuned (official evaluator)
+
+| Model | Params | Type | Grounding | Full SR |
+|---|---:|---:|---:|---:|
+| Laya base (zero-shot) | 322M | 29.0 | 11.8 | N/A |
+| **Laya-Android** | **322M** | **76.7** | **61.7** | **N/A** |
+| Δ | | +47.6 | +49.9 | |
+
 ### Base Laya → Laya-Android (Policy Joint Accuracy, test)
 
 | Split | Base Laya | Laya-Android | Δ |
@@ -46,11 +54,40 @@
 | Epoch 2 (selected) | 0.669 |
 | Epoch 3 | 0.665 |
 
-### Latency (NVIDIA GeForce RTX 4090)
+### Latency
 
-| Params | dtype | Batch | Median | p90 | p95 | Mean | End-to-end median | Peak VRAM (bs1) | Throughput (bs32) |
-|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 322M | bf16 autocast | 1 | 38.3 ms | 41.2 ms | 42.7 ms | 38.0 ms | 42.8 ms | 1.66 GB | 64 steps/s |
+| Hardware | Precision | Median | p95 | Peak VRAM |
+|---|---|---:|---:|---:|
+| RTX 4090 | bf16 autocast | 39.7 ms | 43.5 ms | 1.66 GB |
+
+### Latency by candidate count (batch 1)
+
+| Candidates | n | Median | p95 |
+|---|---:|---:|---:|
+| 1-5 | 102 | 39.7 ms | 42.1 ms |
+| 6-10 | 171 | 39.5 ms | 42.1 ms |
+| 11-20 | 406 | 39.6 ms | 41.5 ms |
+| 21-50 | 295 | 40.3 ms | 43.9 ms |
+| >50 | 21 | 49.0 ms | 78.6 ms |
+
+### Latency by input length (batch 1, longest sequence of the step)
+
+| Input tokens | n | Median | p95 |
+|---|---:|---:|---:|
+| <=512 | 649 | 39.6 ms | 41.8 ms |
+| 513-1024 | 292 | 39.9 ms | 42.5 ms |
+| 1025-1536 | 49 | 42.9 ms | 48.4 ms |
+| >1536 | 10 | 53.1 ms | 105.5 ms |
+
+### Batch size (steps per forward, inputs unsorted)
+
+| Batch | Median batch latency | p95 | Throughput | Peak VRAM allocated | Peak VRAM reserved |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 39.1 ms | 42.3 ms | 25.3 steps/s | 1.66 GB | 1.91 GB |
+| 4 | 40.0 ms | 67.4 ms | 90.4 steps/s | 2.30 GB | 3.45 GB |
+| 8 | 71.3 ms | 158.1 ms | 98.7 steps/s | 3.16 GB | 6.30 GB |
+| 16 | 177.9 ms | 371.3 ms | 80.2 steps/s | 4.89 GB | 11.99 GB |
+| 32 | 431.1 ms | 827.8 ms | 58.3 steps/s | 8.34 GB | 23.35 GB |
 
 ### Operation recall (test; n = gold support)
 

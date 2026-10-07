@@ -1,54 +1,56 @@
 # Laya-Android
 
-A 322M non-generative typed-decision policy for Android GUI action selection, fine-tuned on AndroidControl using accessibility-tree input only.
-
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Model-ByunByun%2Flaya--android-yellow)](https://huggingface.co/ByunByun/laya-android)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 [![Base](https://img.shields.io/badge/Base-convaiinnovations%2Flaya-lightgrey)](https://huggingface.co/convaiinnovations/laya)
-[![Params](https://img.shields.io/badge/Params-322M-green)](#how-it-works)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](requirements.txt)
+[![Params](https://img.shields.io/badge/Params-322M-green)](docs/training.md)
 [![Eval](https://img.shields.io/badge/Eval-protocol-orange)](docs/eval_protocol.md)
 
-**322M · no vision · 76.7 Type / 61.7 Grounding on AndroidControl-High · ~38 ms per decision (RTX 4090)**
+A 322M typed-decision policy for Android GUI control.
+Accessibility tree only · no vision · no autoregressive generation.
 
-| | Laya-Android |
-|---|---:|
-| Parameters | **322M** |
-| Visual input | **None** (accessibility tree only) |
-| Training data | AndroidControl train split only |
-| AndroidControl-High Type | **76.7** |
-| AndroidControl-High Grounding | **61.7** |
-| Full Step SR | N/A (see below) |
-| Median latency | **38.3 ms** (RTX 4090, batch 1) |
+| Parameters | AndroidControl-High Type | AndroidControl-High Grounding | Latency (RTX 4090, bs1) |
+|:---:|:---:|:---:|:---:|
+| **322M** | **76.7** | **61.7** | **~40 ms** |
 
-## What does it do?
+![Laya-Android on a validation episode](figures/replay_success.png)
 
-At each step it reads the user goal, the last three actions and the actionable UI elements from the Android accessibility tree, and answers two questions in one forward pass: *which operation* and *which element*. It does not generate text and does not look at the screen image.
+Every step of a recorded validation episode (chosen by a fixed rule) with Laya-Android's predictions: blue = predicted element, green = gold. The model never sees the screenshots; it reads the accessibility tree. Gold history, not a live run. An episode with a failure: [docs/results.md](docs/results.md#examples-validation).
 
-A real validation step (chosen by a fixed rule, see [Examples](#examples)):
+Given a goal, the last three actions and the actionable UI elements of the Android accessibility tree, Laya-Android picks the next operation and the target element in one forward pass. It is a fine-tune of [Laya](https://github.com/NandhaKishorM/laya) by Convai Innovations, trained only on AndroidControl.
 
-```text
-Goal     find a nike casual shoes for women on the kicks crew app
-History  INPUT_TEXT "casual shoes for women" → CLICK (WMNS) PUMA Oslo Maja … → CLICK Filter
+## Results
 
-UI candidates (16, from the accessibility tree)
-  [0] Dismiss (View)            [4] Brand (ImageView)            [8]  Price Range (ImageView)
-  [1] FILTER Clear All … scroll [5] Size And Type (ImageView)    [9]  Color (ImageView)
-  [2] - (Button)                [6] Release Year (ImageView)     [10] View Results (Button)
-  [3] Clear All (View)          [7] Product Types (ImageView)    [11–15] bottom tabs …
+AndroidControl-High, 8,444 test steps / 1,543 episodes, scored with the public [InfiGUI-R1 evaluator](https://github.com/InfiXAI/InfiGUI-R1) ([protocol](docs/eval_protocol.md)). Same model, same inputs, before and after fine-tuning:
 
-Laya-Android
-  operation   CLICK 0.935   WAIT 0.039   SCROLL_DOWN 0.012
-  target      [4] Brand 0.931   [7] Product Types 0.033   [5] Size And Type 0.008
-Gold          CLICK [4] Brand  ✓
-```
+| Model | Params | Type | Grounding | Full SR |
+|---|---:|---:|---:|---:|
+| Laya base (zero-shot) | 322M | 29.0 | 11.8 | N/A |
+| **Laya-Android** | **322M** | **76.7** | **61.7** | **N/A** |
+| Δ | | +47.6 | +49.9 | |
+
+Full SR is N/A: it requires generated text and app names, which v0 does not produce. For reference, screenshot-based VLMs scored with the same evaluator report higher numbers (e.g. InfiGUI-R1-3B: 82.7 Type / 74.4 Grounding), but they solve a different task (free screen coordinates from pixels rather than choosing among accessibility candidates), so they are not tabulated here; see [docs/results.md](docs/results.md).
+
+![Base vs Laya-Android across test splits](figures/androidcontrol_generalization.png)
+
+Policy Joint = operation correct and, for clicks, the gold element chosen (internal metric, not SR). Per-split Type/Grounding, a stricter grounding variant, operation recall, examples and related work: [docs/results.md](docs/results.md).
+
+## Efficiency
+
+| Hardware | Precision | Median | p95 | Peak VRAM |
+|---|---|---:|---:|---:|
+| RTX 4090 | bf16 autocast | 39.7 ms | 43.5 ms | 1.66 GB |
+
+![Accuracy and latency vs number of candidates](figures/candidate_scaling.png)
+
+Latency stays near 40 ms up to 50 candidates and 1,024 input tokens. Batch sweep and length scaling: [docs/benchmark.md](docs/benchmark.md).
 
 ## Quick start
 
 ```bash
 git clone https://github.com/Byun11/laya-android && cd laya-android
 pip install -r requirements.txt
-python examples/quickstart.py          # downloads ByunByun/laya-android
+python examples/quickstart.py        # loads ByunByun/laya-android
 ```
 
 ```python
@@ -65,229 +67,35 @@ out = agent.system_one(state, questions, max_len=3072, head_max_len=1536)
 out["answers"]["operation"]["choice"], out["answers"]["target"]["choice"]   # ('CLICK', '4')
 ```
 
-Candidates must be built and labeled as in [`src/candidates.py`](src/candidates.py) and [`src/serialization.py`](src/serialization.py); other formats are out of distribution.
-
-## Results
-
-All test numbers come from one evaluation of the frozen checkpoint (epoch 2, chosen on validation). Type and Grounding were computed from the saved predictions after the protocol was committed ([`docs/eval_protocol.md`](docs/eval_protocol.md)). Tables below are generated by `scripts/make_figures.py` into [`results/tables.md`](results/tables.md).
-
-### AndroidControl-High (InfiGUI-R1 evaluator, 8444 steps / 1543 episodes)
-
-| Model | Params | Input | Type | Grounding | Full SR |
-|---|---:|---|---:|---:|---:|
-| InfiGUI-R1-3B† | 3B | Screenshot | 82.7 | 74.4 | 71.1 |
-| Laya base (zero-shot) | 322M | Accessibility tree | 29.0 | 11.8 | N/A |
-| **Laya-Android** | **322M** | **Accessibility tree** | **76.7** | **61.7** | **N/A** |
-
-† Reported by the authors ([InfiGUI-R1](https://github.com/InfiXAI/InfiGUI-R1), arXiv:2504.14239); not reproduced by us. Same evaluator and test set as ours ([`results/external_baselines.json`](results/external_baselines.json)).
-
-Laya-Android selects actions from accessibility-derived UI candidates rather than predicting arbitrary screen coordinates; the gold boxes also come from the accessibility tree. 6.4% of test click/long-press targets (327 / 5,083) are outside our candidate set and count as misses. Full Step SR is not reported because v0 does not generate `INPUT_TEXT` text or `OPEN_APP` app names. AndroidControl-Low is not evaluated: v0 was trained with the high-level goal only.
-
-### Base Laya → Laya-Android (Policy Joint Accuracy, test)
-
-| Split | Base Laya | Laya-Android | Δ |
-|---|---:|---:|---:|
-| IDD | 0.115 | **0.659** | +54.4pt |
-| App-Unseen | 0.112 | **0.540** | +42.8pt |
-| Task-Unseen | 0.108 | **0.567** | +45.9pt |
-| Category-Unseen | 0.108 | **0.545** | +43.7pt |
-
-![Base vs Laya-Android across test splits](figures/androidcontrol_generalization.png)
-
-Fine-tuning the 322M Laya multilingual checkpoint on AndroidControl increases Policy Joint Accuracy from 11.5% to 65.9% on IDD. Performance remains above 54% on the unseen-app, unseen-task and unseen-category splits, although a consistent generalization gap of 9–12 points remains. The model uses accessibility-derived candidates only and takes about 38 ms per decision on an RTX 4090, without autoregressive generation.
-
-### Per split (Laya-Android, test)
-
-| Split | Steps | Type | Grounding | Policy Joint | Target top-1 | Op macro-F1 | Candidate coverage | ECE (op) |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| IDD | 3897 | 81.4 | 67.7 | 0.659 | 0.681 | 0.607 | 95.2% | 0.012 |
-| App-Unseen | 3475 | 70.8 | 53.2 | 0.540 | 0.599 | 0.502 | 93.3% | 0.055 |
-| Task-Unseen | 4464 | 72.8 | 56.5 | 0.567 | 0.629 | 0.515 | 92.3% | 0.045 |
-| Category-Unseen | 3891 | 71.5 | 54.9 | 0.545 | 0.602 | 0.509 | 93.8% | 0.049 |
-
-### Target top-1 by candidate count (union of test steps)
-
-| Candidates | n | Base Laya | Laya-Android |
-|---|---:|---:|---:|
-| 1-5 | 547 | 0.397 | 0.839 |
-| 6-10 | 860 | 0.138 | 0.677 |
-| 11-20 | 2025 | 0.107 | 0.665 |
-| 21-50 | 1228 | 0.067 | 0.543 |
-| >50 | 96 | 0.021 | 0.542 |
-
-![Target top-1 by candidate count](figures/candidate_scaling.png)
-
-Base Laya drops from 0.397 to 0.067 as the number of options grows from 1–5 to 21–50; after fine-tuning the same range goes from 0.839 to 0.543. The >50 bucket has only 96 samples.
-
-### Latency (NVIDIA GeForce RTX 4090)
-
-| Params | dtype | Batch | Median | p90 | p95 | Mean | End-to-end median | Peak VRAM (bs1) | Throughput (bs32) |
-|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 322M | bf16 autocast | 1 | 38.3 ms | 41.2 ms | 42.7 ms | 38.0 ms | 42.8 ms | 1.66 GB | 64 steps/s |
-
-One decision = operation + target question in one forward; 100 warm-up + 1,000 measured steps; end-to-end adds tokenization. Raw data: [`results/latency/rtx4090.json`](results/latency/rtx4090.json). External models are not timed on the same hardware, so no cross-model latency comparison is shown.
-
-### Training progression (validation Policy Joint)
-
-| Checkpoint | Val Policy Joint |
-|---|---:|
-| Base | 0.098 |
-| Smoke-15k | 0.457 |
-| Epoch 1 | 0.605 |
-| Epoch 2 (selected) | 0.669 |
-| Epoch 3 | 0.665 |
-
-![Training progression on validation](figures/training_progression.png)
-
-Validation only. Epoch 2 was selected by validation Policy Joint before any test evaluation.
-
-## Metrics
-
-| Metric | Correct when | Comparable to other papers |
-|---|---|---|
-| **Type** | predicted action type equals the gold type (scroll direction ignored) | yes (InfiGUI-R1 evaluator) |
-| **Grounding** | predicted type is click and the center of the chosen element lies in a gold box (×1.2) or within 4% of the screen from the gold point; denominator = gold clicks | yes (InfiGUI-R1 evaluator) |
-| **Full SR** | type and every argument (point, text, app name, direction) correct | not reported for v0 |
-| **Policy Joint** | operation correct (incl. scroll direction and synthetic DONE) and, for clicks, the chosen element is the gold element | no, internal |
-| Target top-1 | chosen element is the gold element (groundable clicks only) | no, internal |
-
-## Supported actions
-
-| AndroidControl action | Laya-Android operation | Arguments produced |
-|---|---|---|
-| `click` | `CLICK` | target element |
-| `long_press` | `LONG_PRESS` | target element |
-| `scroll` + direction | `SCROLL_UP` / `SCROLL_DOWN` / `SCROLL_LEFT` / `SCROLL_RIGHT` | direction (in the operation) |
-| `input_text` | `INPUT_TEXT` | none: text is **not** generated |
-| `open_app` | `OPEN_APP` | none: app name is **not** generated |
-| `navigate_back` | `BACK` | – |
-| `navigate_home` | `HOME` | – |
-| `wait` | `WAIT` | – |
-| – | `DONE` | – (synthetic end-of-episode label) |
-
-## Failure analysis
-
-<details>
-<summary>Operation recall per test split</summary>
-
-| Operation | IDD | App-Unseen | Task-Unseen | Category-Unseen |
-|---|---:|---:|---:|---:|
-| CLICK | 0.89 (n=2445) | 0.79 (n=2024) | 0.81 (n=2583) | 0.79 (n=2241) |
-| LONG_PRESS | 0.22 (n=9) | – | – | – |
-| SCROLL_UP | 0.55 (n=65) | 0.00 (n=22) | 0.06 (n=31) | 0.07 (n=30) |
-| SCROLL_DOWN | 0.64 (n=412) | 0.57 (n=414) | 0.61 (n=527) | 0.62 (n=499) |
-| SCROLL_LEFT | 0.13 (n=15) | 0.08 (n=26) | 0.04 (n=57) | 0.04 (n=47) |
-| SCROLL_RIGHT | 0.28 (n=18) | 0.68 (n=66) | 0.62 (n=74) | 0.65 (n=71) |
-| OPEN_APP | 0.94 (n=256) | 0.85 (n=243) | 0.88 (n=347) | 0.86 (n=280) |
-| INPUT_TEXT | 0.87 (n=287) | 0.91 (n=243) | 0.90 (n=338) | 0.90 (n=268) |
-| BACK | 0.56 (n=117) | 0.31 (n=211) | 0.32 (n=223) | 0.31 (n=215) |
-| WAIT | 0.41 (n=273) | 0.30 (n=226) | 0.32 (n=284) | 0.31 (n=240) |
-| DONE | 0.75 (n=721) | 0.56 (n=631) | 0.57 (n=803) | 0.55 (n=700) |
-
-Strong: CLICK, OPEN_APP, INPUT_TEXT. Weak: WAIT and BACK (often not inferable from the accessibility tree alone), horizontal scrolling, and LONG_PRESS (157 training examples).
-</details>
-
-<a id="examples"></a>
-<details>
-<summary>Success and failure examples (validation)</summary>
-
-Rule ([`scripts/pick_examples.py`](scripts/pick_examples.py)): validation steps whose gold operation is CLICK, groundable, with 8–20 candidates; shuffled with seed 0; the first fully correct and the first incorrect step. Full data: [`results/val/examples.json`](results/val/examples.json).
-
-**Success**: shown in [What does it do?](#what-does-it-do).
-
-**Failure**: goal *"increase the brightness for a clear view in the Moon+ Reader app"*, history `SCROLL_RIGHT → WAIT`. Of 18 candidates, 14 are unlabeled icons (`- (ImageView)`). The operation is right (CLICK 0.751), but the target is spread over the unlabeled icons ([9] 0.127, [13] 0.096, gold [12] 0.083). Without the image there is nothing to tell these icons apart.
-</details>
+Build candidates with [`src/candidates.py`](src/candidates.py); other label formats are out of distribution.
 
 ## Limitations
 
-- **No visual input.** Unlabeled icons, canvases and custom-drawn UI are hard or impossible to distinguish.
-- **Candidate coverage.** 92.3–95.2% of test click targets are covered by the candidate extractor; the rest are unrecoverable.
-- **Generalization gap.** Policy Joint drops 9–12 points from IDD to unseen apps, tasks and categories.
-- **No text or app-name generation.** `INPUT_TEXT` and `OPEN_APP` need a separate component, so Full Step SR is not reported.
-- **Weak rare actions.** WAIT, BACK, horizontal scroll and LONG_PRESS have low recall.
-- **Offline benchmark only.** Evaluated step by step with gold history on AndroidControl; this is not a measured task success rate of an autonomous agent.
+- No visual input: unlabeled icons and custom-drawn UI are hard to tell apart.
+- No text or app-name generation, so no Full Step SR; AndroidControl-Low not evaluated.
+- Policy Joint drops 9–12 points on unseen apps, tasks and categories.
+- Weak on rare actions (WAIT, BACK, horizontal scroll, LONG_PRESS).
+- Offline, step-level benchmark with gold history; not an autonomous task success rate.
 
-## Roadmap
-
-- AndroidWorld online task success (needs a text/app-name component)
-- Same-input baselines with small generative LLMs on the same evaluator
-- Rare-action ablation (decided on validation only)
-
-## How it works
-
-Laya-Android does not propose a new architecture. It fine-tunes [Laya](https://github.com/NandhaKishorM/laya) (Convai Innovations), a non-generative typed-decision model: every option gets a `[MASK]` marker in one sequence, a bidirectional encoder reads goal, state and options together, and a small head scores each marker.
-
-```text
-Android accessibility tree → actionable UI candidates (src/candidates.py)
-                           → Laya typed decision format (src/serialization.py)
-                           → operation + target, one forward pass
-```
+## More
 
 | | |
 |---|---|
-| Base model | `convaiinnovations/laya`, subfolder `multilingual`, revision `7b928d828b7b0e022f929d9bd2e44165aa270148` |
-| Encoder | mmBERT-base; ~322M parameters with the Laya head |
-| Sequence budget | `max_len` 3072, `head_max_len` 1536 (no candidate is truncated) |
-
-**Training data.** AndroidControl only, official splits: 13,594 train episodes / 74,714 actions (9 zero-action episodes excluded), plus a synthetic `DONE` per episode → 88,308 steps, 132,448 training items. Statistics: [`reports/androidcontrol_stats.json`](reports/androidcontrol_stats.json).
-
-**Input.** `{"goal", "history": last 3 actions, "ui": ["[i] label (class) flags", …]}`; the same labels are the target options. No screenshot, no step instruction.
-
-**Candidates.** Visible, non-keyboard nodes that are clickable, long-clickable, editable, scrollable or checkable; label = own text / description / hint, else descendant text; deduplicated on (box, label); ordered top-to-bottom. A gold tap maps to the smallest containing candidate.
-
-**Training.** Supervised fine-tuning (cross-entropy over options) with `laya.train`, bf16, effective batch 32, encoder lr 2.5e-5, head lr 1e-4, option order shuffled, 3 epochs on one RTX 4090 (2.7 h). No RL, no oversampling, no class weights. Checkpoint chosen by validation Policy Joint; temperatures fit on validation.
-
-## Reproduction
-
-```bash
-pip install -r requirements.txt
-export LAYA_ANDROID_DATA=/path/to/large/disk          # default D:/laya-android
-
-# data (~50GB) into $LAYA_ANDROID_DATA/raw/android_control, then build step-level JSONL
-B=https://storage.googleapis.com/gresearch/android_control
-curl -fLO $B/splits.json && curl -fLO $B/test_subsplits.json
-for i in $(seq -w 0 19); do curl -fLO $B/android_control-000$i-of-00020; done
-python scripts/build_androidcontrol_dataset.py --workers 10
-python scripts/inspect_android_control.py
-
-# train (epoch checkpoints kept; best by validation)
-python scripts/train_laya_android.py configs/full.yaml
-
-# one test pass with saved per-step predictions, base and fine-tuned
-S=test_idd,test_app_unseen,test_task_unseen,test_category_unseen
-python scripts/eval_laya_android.py --model $LAYA_ANDROID_DATA/checkpoints/laya-android-v0 --splits $S \
-    --out results/test/internal_laya_android.json --preds-dir results/test/raw/laya_android
-python scripts/eval_base_laya.py --splits $S --out results/test/internal_base_laya.json --preds-dir results/test/raw/base_laya
-
-# AndroidControl-High Type/Grounding from saved predictions (needs InfiX-ai/android_control_test json)
-python scripts/evaluate_androidcontrol.py --model laya_android --out results/test/final_metrics.json --preds-out results/test/final_predictions.jsonl.gz
-python scripts/evaluate_androidcontrol.py --model base_laya --out results/test/base_metrics.json --preds-out results/test/base_predictions.jsonl.gz
-
-python scripts/benchmark_latency.py --out results/latency/rtx4090.json
-python scripts/make_figures.py
-```
+| [docs/results.md](docs/results.md) | per-split results, strict grounding, operation recall, examples, training progression, related work |
+| [docs/benchmark.md](docs/benchmark.md) | latency by candidates, input length and batch size |
+| [docs/training.md](docs/training.md) | model diagram, data, candidate extraction, input format, actions, training, reproduction |
+| [docs/eval_protocol.md](docs/eval_protocol.md) | evaluation protocol, frozen before scoring |
 
 ## Citation
-
-See [`CITATION.cff`](CITATION.cff).
 
 ```bibtex
 @software{laya_android_2026,
   title   = {Laya-Android},
   author  = {Byun, Jaeyeon},
   year    = {2026},
-  version = {0.1.0},
+  version = {0.2.1},
   url     = {https://github.com/Byun11/laya-android}
 }
 ```
 
-Please also cite AndroidControl (Li et al., 2024, arXiv:2406.03679) and Laya.
-
-## Acknowledgements and license
-
-- Built on top of [Laya](https://github.com/NandhaKishorM/laya) by Convai Innovations (Apache-2.0). Laya-Android is not affiliated with or endorsed by Convai Innovations.
-- Encoder: [mmBERT-base](https://huggingface.co/jhu-clsp/mmBERT-base) (MIT).
-- Data: [AndroidControl](https://github.com/google-research/google-research/tree/master/android_control) by Google Research (Apache-2.0).
-- Evaluator: [InfiGUI-R1](https://github.com/InfiXAI/InfiGUI-R1) `evaluate_android_control.py`, vendored unmodified in `third_party/infigui_r1/` (Apache-2.0).
-
-Apache-2.0. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
+Built on [Laya](https://github.com/NandhaKishorM/laya) (Convai Innovations, Apache-2.0; not affiliated), [mmBERT-base](https://huggingface.co/jhu-clsp/mmBERT-base) (MIT) and [AndroidControl](https://github.com/google-research/google-research/tree/master/android_control) (Google Research, Apache-2.0). Evaluator: [InfiGUI-R1](https://github.com/InfiXAI/InfiGUI-R1) (Apache-2.0). Licensed Apache-2.0, see [LICENSE](LICENSE) and [NOTICE](NOTICE).

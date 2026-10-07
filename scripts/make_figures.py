@@ -63,6 +63,52 @@ def grouped(ax, labels, base, ours):
     ax.legend(frameon=False, loc="upper right", labelcolor=INK)
 
 
+def draw_overview(ex, ms, gpu):
+    """Horizontal flow: inputs -> Laya-Android -> operation / target, with real numbers."""
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(12, 4.2))
+    ax.set_xlim(0, 12)
+    ax.set_ylim(0, 4.2)
+    ax.axis("off")
+
+    def box(x, y, w, h, title, body, edge=MUTED, fill=SURFACE, title_color=INK, mono=True):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.12", linewidth=1.4,
+                                    edgecolor=edge, facecolor=fill))
+        ax.text(x + 0.18, y + h - 0.2, title, ha="left", va="top", fontsize=10.5, color=title_color, weight="bold")
+        ax.text(x + 0.18, y + h - 0.6, body, ha="left", va="top", fontsize=8.6, color=INK,
+                family="monospace" if mono else None, linespacing=1.45)
+
+    def arrow(x1, y1, x2, y2):
+        ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>", mutation_scale=14, color=MUTED, linewidth=1.4))
+
+    import textwrap
+    goal = textwrap.wrap(ex["goal"], 40)
+    goal = goal[:2] if len(goal) <= 2 else [goal[0], goal[1] + " …"]
+    hist = " → ".join(h[:22] for h in ex["history"][-2:])
+    box(0.1, 2.55, 4.3, 1.5, "Goal + recent actions",
+        "\n".join(goal + [hist]), mono=False)
+    cands = ex["candidates"]
+    shown = ["[%d] %s" % (i, c[:24]) for i, c in enumerate(cands[:6])]
+    box(0.1, 0.1, 4.3, 2.25, "Accessibility UI candidates (%d)" % len(cands), "\n".join(shown) + "\n…")
+    box(5.15, 1.15, 2.4, 1.9, "Laya-Android", "322M encoder\none forward pass\nno text generation\nno screenshot",
+        edge=OURS, fill="#eaf2fc", title_color=OURS, mono=False)
+    arrow(4.45, 3.2, 5.1, 2.5)
+    arrow(4.45, 1.2, 5.1, 1.7)
+    (op, p_op), = ex["pred_operation_top3"][:1]
+    t_idx, t_lab, p_t = ex["pred_target_top3"][0]
+    box(8.3, 2.55, 3.6, 1.5, "Operation", "%-12s %.3f\n%-12s %.3f" % (op, p_op, *ex["pred_operation_top3"][1]))
+    box(8.3, 0.65, 3.6, 1.5, "Target", "[%d] %-14s %.3f\n[%d] %-14s %.3f" % (
+        t_idx, t_lab.split(" (")[0][:14], p_t, ex["pred_target_top3"][1][0],
+        ex["pred_target_top3"][1][1].split(" (")[0][:14], ex["pred_target_top3"][1][2]))
+    arrow(7.6, 2.5, 8.25, 3.2)
+    arrow(7.6, 1.7, 8.25, 1.4)
+    ax.text(6.35, 0.75, "~%.0f ms / decision\n(%s, batch 1)" % (ms, gpu.replace("NVIDIA GeForce ", "")),
+            ha="center", va="top", fontsize=9, color=MUTED)
+    ax.text(8.3, 0.35, "real validation step; gold = %s [%d]" % (ex["gold"]["operation"], ex["gold"]["target"]),
+            ha="left", va="top", fontsize=8, color=MUTED)
+    save(fig, "overview")
+
+
 def pooled_buckets(model):
     """Target top-1 by candidate count over the union of test steps (subsplits overlap; dedup by episode/step)."""
     seen, hit = set(), {b: [0, 0] for b, _, _ in BUCKETS}
@@ -100,18 +146,35 @@ def main():
     style(ax, "Policy Joint Accuracy", "AndroidControl test: base Laya vs. Laya-Android (Policy Joint)")
     save(fig, "androidcontrol_generalization")
 
-    # Figure 2: target top-1 by candidate count
+    # Figure 2: candidate count -> accuracy (left) and latency (right); two panels, one y-scale each
     pb, po = pooled_buckets("base_laya"), pooled_buckets("laya_android")
     labels = [b for b, _, _ in BUCKETS]
-    fig, ax = plt.subplots(figsize=(7.2, 3.9))
+    lc = lat["models"]["laya_android"]["forward_ms_by_candidates"]
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(11, 3.9), gridspec_kw={"width_ratios": [1.35, 1]})
     grouped(ax, ["%s\nn=%d%s" % (b, po[b]["n"], "*" if po[b]["n"] < SMALL_N else "") for b in labels],
             [pb[b]["acc"] for b in labels], [po[b]["acc"] for b in labels])
     ax.set_ylim(0, 1.0)
-    ax.set_xlabel("UI candidates on screen (test steps with a groundable click target)", color=INK)
-    style(ax, "Target top-1", "Target selection vs. number of candidates (all test steps)")
-    if any(po[b]["n"] < SMALL_N for b in labels):
-        fig.text(0.01, 0.01, "* n < %d: high variance, read with care" % SMALL_N, color=MUTED, fontsize=8)
+    ax.set_xlabel("UI candidates on screen", color=INK)
+    style(ax, "Target top-1 (test)", "Accuracy vs. candidates")
+    xs = range(len(labels))
+    med = [lc[b]["median"] for b in labels]
+    ax2.bar(xs, med, 0.55, color=OURS, edgecolor=SURFACE, linewidth=1.5)
+    ax2.errorbar(xs, med, yerr=[[0] * len(labels), [lc[b]["p95"] - lc[b]["median"] for b in labels]],
+                 fmt="none", ecolor=MUTED, capsize=4, linewidth=1)
+    for x, b in zip(xs, labels):
+        ax2.text(x, lc[b]["p95"] + 1.5, "%.0f" % lc[b]["median"], ha="center", fontsize=9, color=INK)
+    ax2.set_xticks(list(xs))
+    ax2.set_xticklabels(["%s\nn=%d%s" % (b, lc[b]["n"], "*" if lc[b]["n"] < SMALL_N else "") for b in labels])
+    ax2.set_ylim(0, max(lc[b]["p95"] for b in labels) * 1.25)
+    ax2.set_xlabel("UI candidates on screen", color=INK)
+    style(ax2, "ms per decision (batch 1)", "Latency vs. candidates (median, whisker = p95)")
+    fig.text(0.01, 0.01, "* n < %d: high variance. Left: union of test steps with a groundable click. "
+             "Right: %d sampled test_idd steps." % (SMALL_N, lat["measured"]), color=MUTED, fontsize=8)
     save(fig, "candidate_scaling")
+
+    # Figure 0: overview, drawn from a real validation example and the measured latency
+    ex = load("results", "val", "examples.json")["success"]
+    draw_overview(ex, lat["models"]["laya_android"]["forward_ms"]["median"], lat["gpu"])
 
     # Figure 3: validation training progression (one series, selected epoch marked)
     best = hist["best"]["epoch"]
@@ -141,6 +204,13 @@ def main():
          "| Laya base (zero-shot) | 322M | Accessibility tree | %.1f | %.1f | N/A |" % (
              base["androidcontrol_high"]["all"]["type"], base["androidcontrol_high"]["all"]["grounding"]),
          "| **Laya-Android** | **322M** | **Accessibility tree** | **%.1f** | **%.1f** | **N/A** |" % (hi["type"], hi["grounding"]),
+         "", "### AndroidControl-High: base vs fine-tuned (official evaluator)", "",
+         "| Model | Params | Type | Grounding | Full SR |", "|---|---:|---:|---:|---:|",
+         "| Laya base (zero-shot) | 322M | %.1f | %.1f | N/A |" % (base["androidcontrol_high"]["all"]["type"],
+                                                             base["androidcontrol_high"]["all"]["grounding"]),
+         "| **Laya-Android** | **322M** | **%.1f** | **%.1f** | **N/A** |" % (hi["type"], hi["grounding"]),
+         "| Δ | | +%.1f | +%.1f | |" % (hi["type"] - base["androidcontrol_high"]["all"]["type"],
+                                       hi["grounding"] - base["androidcontrol_high"]["all"]["grounding"]),
          "", "### Base Laya → Laya-Android (Policy Joint Accuracy, test)", "",
          "| Split | Base Laya | Laya-Android | Δ |", "|---|---:|---:|---:|"]
     for s, n in SPLITS:
@@ -160,12 +230,20 @@ def main():
     T += ["", "### Training progression (validation Policy Joint)", "", "| Checkpoint | Val Policy Joint |", "|---|---:|"]
     T += ["| %s%s | %.3f |" % (n, " (selected)" if i == sel else "", v) for i, (n, v) in enumerate(pts)]
     m = lat["models"]["laya_android"]
-    T += ["", "### Latency (%s)" % lat["gpu"], "",
-          "| Params | dtype | Batch | Median | p90 | p95 | Mean | End-to-end median | Peak VRAM (bs1) | Throughput (bs32) |",
-          "|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|",
-          "| %.0fM | bf16 autocast | 1 | %.1f ms | %.1f ms | %.1f ms | %.1f ms | %.1f ms | %.2f GB | %.0f steps/s |" % (
-              m["params_m"], m["forward_ms"]["median"], m["forward_ms"]["p90"], m["forward_ms"]["p95"],
-              m["forward_ms"]["mean"], m["e2e_ms"]["median"], m["peak_vram_gb_bs1"], m["throughput_steps_per_s_batch32"])]
+    T += ["", "### Latency", "", "| Hardware | Precision | Median | p95 | Peak VRAM |", "|---|---|---:|---:|---:|",
+          "| %s | bf16 autocast | %.1f ms | %.1f ms | %.2f GB |" % (lat["gpu"].replace("NVIDIA GeForce ", ""),
+              m["forward_ms"]["median"], m["forward_ms"]["p95"], m["peak_vram_allocated_gb_bs1"])]
+    T += ["", "### Latency by candidate count (batch 1)", "", "| Candidates | n | Median | p95 |", "|---|---:|---:|---:|"]
+    T += ["| %s | %d | %.1f ms | %.1f ms |" % (b, v["n"], v["median"], v["p95"]) for b, v in m["forward_ms_by_candidates"].items()]
+    T += ["", "### Latency by input length (batch 1, longest sequence of the step)", "",
+          "| Input tokens | n | Median | p95 |", "|---|---:|---:|---:|"]
+    T += ["| %s | %d | %.1f ms | %.1f ms |" % (b, v["n"], v["median"], v["p95"]) for b, v in m["forward_ms_by_input_tokens"].items() if v]
+    T += ["", "### Batch size (steps per forward, inputs unsorted)", "",
+          "| Batch | Median batch latency | p95 | Throughput | Peak VRAM allocated | Peak VRAM reserved |",
+          "|---:|---:|---:|---:|---:|---:|"]
+    T += ["| %s | %.1f ms | %.1f ms | %.1f steps/s | %.2f GB | %.2f GB |" % (
+        bs, v["batch_ms"]["median"], v["batch_ms"]["p95"], v["throughput_steps_per_s"], v["peak_vram_allocated_gb"],
+        v["peak_vram_reserved_gb"]) for bs, v in m["batch_sweep"].items()]
     ops = list(fi[SPLITS[0][0]]["op_per_class"])
     T += ["", "### Operation recall (test; n = gold support)", "", "| Operation | " + " | ".join(n for _, n in SPLITS) + " |",
           "|---|" + "---:|" * len(SPLITS)]

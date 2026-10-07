@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: Laya-Android
 type: software
-version: 0.1.0
+version: 0.2.1
 date-released: 2026-10-07
 license: Apache-2.0
 repository-code: https://github.com/Byun11/laya-android

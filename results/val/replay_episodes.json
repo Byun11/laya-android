@@ -1,0 +1,33 @@
+{
+ "rule": [
+  "(teacher forcing), exactly as evaluated. Episodes are picked by a fixed rule from VALIDATION only:",
+  "  val episodes with 4-8 real actions, ids sorted then shuffled with seed 0;"
+ ],
+ "mixed": {
+  "episode_id": 10615,
+  "goal": "Search for oats in the Foodro app for my breakfast.",
+  "steps_correct": [
+   true,
+   true,
+   true,
+   true,
+   false
+  ],
+  "size_kb": 257
+ },
+ "success": {
+  "episode_id": 8836,
+  "goal": "Open the Mappls MapmyIndia app and then search for Diamond crown banquet and start navigation ",
+  "steps_correct": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "size_kb": 559
+ }
+}
