@@ -2,8 +2,8 @@
 
 python scripts/evaluate_androidcontrol.py --model laya_android --out results/test/final_metrics.json \
     --preds-out results/test/final_predictions.jsonl.gz
-Definitions: docs/eval_protocol.md (frozen at commit f2c27d7 before these numbers were computed).
-Inputs: results/preds/<model>/test_*.preds.jsonl.gz, results/test_<model>.json (internal metrics, same pass),
+Definitions: docs/eval_protocol.md (frozen at commit 41f0a33 before these numbers were computed).
+Inputs: results/test/raw/<model>/test_*.preds.jsonl.gz, results/test/internal_<model>.json (internal metrics, same pass),
         $LAYA_ANDROID_DATA/processed/androidcontrol/test_*.jsonl (candidate boxes),
         reference test file android_control_test.json (InfiX-ai/android_control_test).
 """
@@ -24,7 +24,7 @@ from data import android_control as AC  # noqa: E402
 
 PROC = os.path.join(AC.DATA_ROOT, "processed", "androidcontrol")
 SPLITS = ["test_idd", "test_app_unseen", "test_task_unseen", "test_category_unseen"]
-PROTOCOL_COMMIT = "f2c27d75a69d0fedc2f99cc39da158393e1034e5"
+PROTOCOL_COMMIT = "41f0a3391045bd513f02b59fd467d39f43887981"
 REF_ACTION = {"CLICK": "click", "LONG_PRESS": "long_press", "INPUT_TEXT": "type", "OPEN_APP": "open",
               "BACK": "system_button", "HOME": "system_button", "WAIT": "wait", "DONE": "terminate"}
 SWIPE = {"SCROLL_UP": (0, -1), "SCROLL_DOWN": (0, 1), "SCROLL_LEFT": (-1, 0), "SCROLL_RIGHT": (1, 0)}
@@ -80,7 +80,7 @@ def main():
                 members[s].add(key)
     preds = {}
     for s in SPLITS:
-        with gzip.open(os.path.join(ROOT, "results", "preds", args.model, s + ".preds.jsonl.gz"), "rt", encoding="utf8") as f:
+        with gzip.open(os.path.join(ROOT, "results", "test", "raw", args.model, s + ".preds.jsonl.gz"), "rt", encoding="utf8") as f:
             for line in f:
                 p = json.loads(line)
                 if p["operation_gold"] != "DONE":
@@ -92,6 +92,7 @@ def main():
     assert mism == 0, "gold action types disagree with the reference on %d steps" % mism
 
     rows = {}
+    os.makedirs(os.path.dirname(args.preds_out) or ".", exist_ok=True)
     with gzip.open(args.preds_out, "wt", encoding="utf8") as out:
         for key in sorted(ref):
             pam, w, h = ref[key]
@@ -117,7 +118,7 @@ def main():
                 "type": round(100 * t / len(keys), 2), "grounding": round(100 * g_hit / g_n, 2) if g_n else None,
                 "gold_clicks": g_n, "full_sr": None}
 
-    internal = json.load(open(os.path.join(ROOT, "results", "test_%s.json" % args.model), encoding="utf8"))
+    internal = json.load(open(os.path.join(ROOT, "results", "test", "internal_%s.json" % args.model), encoding="utf8"))
     report = {
         "model": args.model, "protocol": "docs/eval_protocol.md", "protocol_commit": PROTOCOL_COMMIT,
         "code_commit": git_head(), "reference_evaluator": "InfiGUI-R1@a4fca17 evaluate_android_control_action",

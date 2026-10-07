@@ -1,0 +1,495 @@
+{
+ "config": {
+  "name": "laya-android-v0",
+  "base": "multilingual",
+  "train_steps": null,
+  "seed": 0,
+  "epochs": 3,
+  "micro_batch": 8,
+  "grad_accum": 4,
+  "encoder_lr": 2.5e-05,
+  "head_lr": 0.0001,
+  "loss": "soft-ce",
+  "shuffle_options": [
+   "choice"
+  ],
+  "gradient_checkpointing": true
+ },
+ "train_steps": 88308,
+ "train_items": 132448,
+ "skipped": {},
+ "epochs": [
+  {
+   "epoch": 1,
+   "train_loss": 1.0187125600681814,
+   "val": {
+    "steps": 827,
+    "operation_accuracy": 0.7678,
+    "target_top1_accuracy": 0.6309,
+    "joint_action_accuracy": 0.6047,
+    "grounding_coverage": 0.9525,
+    "ece_operation": 0.027,
+    "brier_operation": 0.3236,
+    "ece_target": 0.0812,
+    "brier_target": 0.4891,
+    "latency_ms_median": null,
+    "latency_ms_p95": null,
+    "target_top1_by_candidates": {
+     "1-5": {
+      "acc": 0.807,
+      "n": 57
+     },
+     "6-10": {
+      "acc": 0.6747,
+      "n": 83
+     },
+     "11-20": {
+      "acc": 0.6039,
+      "n": 154
+     },
+     "21-50": {
+      "acc": 0.5545,
+      "n": 101
+     },
+     ">50": {
+      "acc": 0.3333,
+      "n": 6
+     }
+    },
+    "operation_macro_f1": 0.5425,
+    "op_per_class": {
+     "CLICK": {
+      "precision": 0.8004,
+      "recall": 0.8786,
+      "f1": 0.8377,
+      "n_gold": 420,
+      "n_pred": 461
+     },
+     "LONG_PRESS": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 1,
+      "n_pred": 0
+     },
+     "SCROLL_UP": {
+      "precision": 0.8,
+      "recall": 0.4444,
+      "f1": 0.5714,
+      "n_gold": 9,
+      "n_pred": 5
+     },
+     "SCROLL_DOWN": {
+      "precision": 0.5821,
+      "recall": 0.5493,
+      "f1": 0.5652,
+      "n_gold": 71,
+      "n_pred": 67
+     },
+     "SCROLL_LEFT": {
+      "precision": 0.5,
+      "recall": 0.3333,
+      "f1": 0.4,
+      "n_gold": 3,
+      "n_pred": 2
+     },
+     "SCROLL_RIGHT": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 3,
+      "n_pred": 2
+     },
+     "OPEN_APP": {
+      "precision": 0.8542,
+      "recall": 0.9111,
+      "f1": 0.8817,
+      "n_gold": 45,
+      "n_pred": 48
+     },
+     "INPUT_TEXT": {
+      "precision": 0.8704,
+      "recall": 0.8868,
+      "f1": 0.8785,
+      "n_gold": 53,
+      "n_pred": 54
+     },
+     "BACK": {
+      "precision": 0.7391,
+      "recall": 0.5862,
+      "f1": 0.6538,
+      "n_gold": 29,
+      "n_pred": 23
+     },
+     "WAIT": {
+      "precision": 0.9474,
+      "recall": 0.3214,
+      "f1": 0.48,
+      "n_gold": 56,
+      "n_pred": 19
+     },
+     "DONE": {
+      "precision": 0.6781,
+      "recall": 0.7226,
+      "f1": 0.6996,
+      "n_gold": 137,
+      "n_pred": 146
+     }
+    },
+    "unfit_items": {}
+   }
+  },
+  {
+   "epoch": 2,
+   "train_loss": 0.6526294294722229,
+   "val": {
+    "steps": 827,
+    "operation_accuracy": 0.7969,
+    "target_top1_accuracy": 0.7032,
+    "joint_action_accuracy": 0.6691,
+    "grounding_coverage": 0.9525,
+    "ece_operation": 0.0283,
+    "brier_operation": 0.2972,
+    "ece_target": 0.0645,
+    "brier_target": 0.4188,
+    "latency_ms_median": null,
+    "latency_ms_p95": null,
+    "target_top1_by_candidates": {
+     "1-5": {
+      "acc": 0.8421,
+      "n": 57
+     },
+     "6-10": {
+      "acc": 0.7108,
+      "n": 83
+     },
+     "11-20": {
+      "acc": 0.6948,
+      "n": 154
+     },
+     "21-50": {
+      "acc": 0.6337,
+      "n": 101
+     },
+     ">50": {
+      "acc": 0.6667,
+      "n": 6
+     }
+    },
+    "operation_macro_f1": 0.5421,
+    "op_per_class": {
+     "CLICK": {
+      "precision": 0.8428,
+      "recall": 0.881,
+      "f1": 0.8615,
+      "n_gold": 420,
+      "n_pred": 439
+     },
+     "LONG_PRESS": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 1,
+      "n_pred": 0
+     },
+     "SCROLL_UP": {
+      "precision": 0.6667,
+      "recall": 0.6667,
+      "f1": 0.6667,
+      "n_gold": 9,
+      "n_pred": 9
+     },
+     "SCROLL_DOWN": {
+      "precision": 0.5844,
+      "recall": 0.6338,
+      "f1": 0.6081,
+      "n_gold": 71,
+      "n_pred": 77
+     },
+     "SCROLL_LEFT": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 3,
+      "n_pred": 1
+     },
+     "SCROLL_RIGHT": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 3,
+      "n_pred": 1
+     },
+     "OPEN_APP": {
+      "precision": 0.86,
+      "recall": 0.9556,
+      "f1": 0.9053,
+      "n_gold": 45,
+      "n_pred": 50
+     },
+     "INPUT_TEXT": {
+      "precision": 0.9184,
+      "recall": 0.8491,
+      "f1": 0.8824,
+      "n_gold": 53,
+      "n_pred": 49
+     },
+     "BACK": {
+      "precision": 0.7308,
+      "recall": 0.6552,
+      "f1": 0.6909,
+      "n_gold": 29,
+      "n_pred": 26
+     },
+     "WAIT": {
+      "precision": 0.7941,
+      "recall": 0.4821,
+      "f1": 0.6,
+      "n_gold": 56,
+      "n_pred": 34
+     },
+     "DONE": {
+      "precision": 0.7376,
+      "recall": 0.7591,
+      "f1": 0.7482,
+      "n_gold": 137,
+      "n_pred": 141
+     }
+    },
+    "unfit_items": {}
+   }
+  },
+  {
+   "epoch": 3,
+   "train_loss": 0.3659542264667364,
+   "val": {
+    "steps": 827,
+    "operation_accuracy": 0.7896,
+    "target_top1_accuracy": 0.7032,
+    "joint_action_accuracy": 0.6654,
+    "grounding_coverage": 0.9525,
+    "ece_operation": 0.1052,
+    "brier_operation": 0.3222,
+    "ece_target": 0.1211,
+    "brier_target": 0.4379,
+    "latency_ms_median": null,
+    "latency_ms_p95": null,
+    "target_top1_by_candidates": {
+     "1-5": {
+      "acc": 0.8596,
+      "n": 57
+     },
+     "6-10": {
+      "acc": 0.747,
+      "n": 83
+     },
+     "11-20": {
+      "acc": 0.6688,
+      "n": 154
+     },
+     "21-50": {
+      "acc": 0.6238,
+      "n": 101
+     },
+     ">50": {
+      "acc": 0.8333,
+      "n": 6
+     }
+    },
+    "operation_macro_f1": 0.5743,
+    "op_per_class": {
+     "CLICK": {
+      "precision": 0.8319,
+      "recall": 0.8952,
+      "f1": 0.8624,
+      "n_gold": 420,
+      "n_pred": 452
+     },
+     "LONG_PRESS": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 1,
+      "n_pred": 0
+     },
+     "SCROLL_UP": {
+      "precision": 0.7778,
+      "recall": 0.7778,
+      "f1": 0.7778,
+      "n_gold": 9,
+      "n_pred": 9
+     },
+     "SCROLL_DOWN": {
+      "precision": 0.5588,
+      "recall": 0.5352,
+      "f1": 0.5468,
+      "n_gold": 71,
+      "n_pred": 68
+     },
+     "SCROLL_LEFT": {
+      "precision": 0.5,
+      "recall": 0.3333,
+      "f1": 0.4,
+      "n_gold": 3,
+      "n_pred": 2
+     },
+     "SCROLL_RIGHT": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_gold": 3,
+      "n_pred": 1
+     },
+     "OPEN_APP": {
+      "precision": 0.8776,
+      "recall": 0.9556,
+      "f1": 0.9149,
+      "n_gold": 45,
+      "n_pred": 49
+     },
+     "INPUT_TEXT": {
+      "precision": 0.9333,
+      "recall": 0.7925,
+      "f1": 0.8571,
+      "n_gold": 53,
+      "n_pred": 45
+     },
+     "BACK": {
+      "precision": 0.7083,
+      "recall": 0.5862,
+      "f1": 0.6415,
+      "n_gold": 29,
+      "n_pred": 24
+     },
+     "WAIT": {
+      "precision": 0.7879,
+      "recall": 0.4643,
+      "f1": 0.5843,
+      "n_gold": 56,
+      "n_pred": 33
+     },
+     "DONE": {
+      "precision": 0.7153,
+      "recall": 0.7518,
+      "f1": 0.7331,
+      "n_gold": 137,
+      "n_pred": 144
+     }
+    },
+    "unfit_items": {}
+   }
+  }
+ ],
+ "train_hours": 2.726,
+ "loss_curve_per_500_microbatches": [
+  1.6577,
+  1.4143,
+  1.3132,
+  1.223,
+  1.1461,
+  1.128,
+  1.1297,
+  1.0867,
+  1.1006,
+  1.0362,
+  1.0609,
+  1.0502,
+  1.0163,
+  1.0216,
+  0.9799,
+  0.9915,
+  0.9479,
+  0.9513,
+  0.9499,
+  0.9328,
+  0.9357,
+  0.9554,
+  0.872,
+  0.882,
+  0.9043,
+  0.9094,
+  0.8937,
+  0.8832,
+  0.8486,
+  0.8857,
+  0.8372,
+  0.8557,
+  0.841,
+  0.7165,
+  0.7106,
+  0.6942,
+  0.6924,
+  0.6855,
+  0.638,
+  0.67,
+  0.6596,
+  0.6655,
+  0.6432,
+  0.6737,
+  0.6511,
+  0.6619,
+  0.6672,
+  0.6475,
+  0.6393,
+  0.694,
+  0.6558,
+  0.6641,
+  0.6433,
+  0.6673,
+  0.6257,
+  0.6533,
+  0.6192,
+  0.6239,
+  0.6388,
+  0.6295,
+  0.6218,
+  0.6129,
+  0.6387,
+  0.6259,
+  0.6225,
+  0.611,
+  0.4611,
+  0.4021,
+  0.3677,
+  0.3894,
+  0.3773,
+  0.3847,
+  0.3805,
+  0.3782,
+  0.3769,
+  0.3701,
+  0.3543,
+  0.3782,
+  0.3817,
+  0.3905,
+  0.3653,
+  0.3666,
+  0.3515,
+  0.3728,
+  0.3494,
+  0.3712,
+  0.365,
+  0.3482,
+  0.3728,
+  0.3556,
+  0.3317,
+  0.3469,
+  0.3406,
+  0.3507,
+  0.3813,
+  0.3304,
+  0.3504,
+  0.3584,
+  0.3325
+ ],
+ "best": {
+  "joint": 0.6691,
+  "epoch": 2
+ },
+ "temperature": [
+  1.1609286069869995,
+  1.0,
+  1.0
+ ],
+ "hardware": "NVIDIA GeForce RTX 4090"
+}

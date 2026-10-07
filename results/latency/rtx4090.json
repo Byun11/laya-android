@@ -1,0 +1,128 @@
+{
+ "gpu": "NVIDIA GeForce RTX 4090",
+ "torch": "2.14.1+cu130",
+ "dtype": "fp32 weights + bf16 autocast",
+ "batch_size": 1,
+ "warmup": 100,
+ "measured": 1000,
+ "inputs": "test_idd, seed 0 (labels unused)",
+ "questions_per_step": "operation + target (all candidates), one forward",
+ "max_len": 3072,
+ "head_max_len": 1536,
+ "models": {
+  "base_laya": {
+   "forward_ms": {
+    "n": 1000,
+    "median": 38.6,
+    "p90": 42.75,
+    "p95": 44.67,
+    "mean": 38.51
+   },
+   "e2e_ms": {
+    "n": 1000,
+    "median": 42.91,
+    "p90": 48.49,
+    "p95": 51.52,
+    "mean": 43.22
+   },
+   "forward_ms_by_candidates": {
+    "1-5": {
+     "n": 102,
+     "median": 38.71,
+     "p90": 41.06,
+     "p95": 43.27,
+     "mean": 37.92
+    },
+    "6-10": {
+     "n": 171,
+     "median": 38.38,
+     "p90": 41.95,
+     "p95": 43.82,
+     "mean": 38.22
+    },
+    "11-20": {
+     "n": 406,
+     "median": 38.27,
+     "p90": 41.51,
+     "p95": 42.75,
+     "mean": 37.99
+    },
+    "21-50": {
+     "n": 295,
+     "median": 38.41,
+     "p90": 43.65,
+     "p95": 44.96,
+     "mean": 38.62
+    },
+    ">50": {
+     "n": 21,
+     "median": 46.85,
+     "p90": 65.68,
+     "p95": 68.65,
+     "mean": 51.96
+    }
+   },
+   "throughput_steps_per_s_batch32": 64.2,
+   "peak_vram_gb_bs1": 1.66,
+   "peak_vram_gb_batch32": 8.34,
+   "params_m": 321.9
+  },
+  "laya_android": {
+   "forward_ms": {
+    "n": 1000,
+    "median": 38.27,
+    "p90": 41.2,
+    "p95": 42.66,
+    "mean": 37.95
+   },
+   "e2e_ms": {
+    "n": 1000,
+    "median": 42.82,
+    "p90": 47.36,
+    "p95": 49.52,
+    "mean": 42.68
+   },
+   "forward_ms_by_candidates": {
+    "1-5": {
+     "n": 102,
+     "median": 38.1,
+     "p90": 40.7,
+     "p95": 41.78,
+     "mean": 37.72
+    },
+    "6-10": {
+     "n": 171,
+     "median": 38.32,
+     "p90": 40.17,
+     "p95": 41.66,
+     "mean": 37.76
+    },
+    "11-20": {
+     "n": 406,
+     "median": 38.18,
+     "p90": 40.48,
+     "p95": 41.79,
+     "mean": 37.56
+    },
+    "21-50": {
+     "n": 295,
+     "median": 38.33,
+     "p90": 41.43,
+     "p95": 42.37,
+     "mean": 37.96
+    },
+    ">50": {
+     "n": 21,
+     "median": 44.33,
+     "p90": 63.6,
+     "p95": 66.23,
+     "mean": 48.22
+    }
+   },
+   "throughput_steps_per_s_batch32": 63.6,
+   "peak_vram_gb_bs1": 1.66,
+   "peak_vram_gb_batch32": 8.34,
+   "params_m": 321.9
+  }
+ }
+}

@@ -1,0 +1,132 @@
+{
+ "rule": "Rule: val steps whose gold op is CLICK, groundable, with 8-20 candidates; shuffle with seed 0; take the first step the model gets fully right (op + target) and the first it gets wrong.",
+ "success": {
+  "episode_id": 18246,
+  "step": 5,
+  "goal": "My old shoes are damaged and I'm planning to buy new casual shoes ,find a nike casual shoes for women on the kicks crew app",
+  "history": [
+   "INPUT_TEXT \"casual shoes for women\"",
+   "CLICK (WMNS) PUMA Oslo Maja For Casual Shoes White/Purple/Yellow U",
+   "CLICK Filter"
+  ],
+  "candidates": [
+   "Dismiss (View)",
+   "FILTER Clear All Brand Size And Type Rel (View) scroll",
+   "- (Button)",
+   "Clear All (View)",
+   "Brand (ImageView)",
+   "Size And Type (ImageView)",
+   "Release Year (ImageView)",
+   "Product Types (ImageView)",
+   "Price Range (ImageView)",
+   "Color (ImageView)",
+   "View Results (Button)",
+   "Home Tab 1 of 5 (ImageView) selected",
+   "Search Tab 2 of 5 (ImageView)",
+   "Calendar Tab 3 of 5 (ImageView)",
+   "Wishlist Tab 4 of 5 (ImageView)",
+   "Account Tab 5 of 5 (ImageView)"
+  ],
+  "gold": {
+   "operation": "CLICK",
+   "target": 4,
+   "target_label": "Brand (ImageView)"
+  },
+  "pred_operation_top3": [
+   [
+    "CLICK",
+    0.935
+   ],
+   [
+    "WAIT",
+    0.039
+   ],
+   [
+    "SCROLL_DOWN",
+    0.012
+   ]
+  ],
+  "pred_target_top3": [
+   [
+    4,
+    "Brand (ImageView)",
+    0.931
+   ],
+   [
+    7,
+    "Product Types (ImageView)",
+    0.033
+   ],
+   [
+    5,
+    "Size And Type (ImageView)",
+    0.008
+   ]
+  ]
+ },
+ "failure": {
+  "episode_id": 6538,
+  "step": 2,
+  "goal": "I want to increase the brightness for a clear view in the Moon+ Reader app.",
+  "history": [
+   "SCROLL_RIGHT",
+   "WAIT"
+  ],
+  "candidates": [
+   "- (ImageView)",
+   "Garcia Lorca: Yerma (TextView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "4/63 (TextView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "- (ImageView)",
+   "100 09:36 (LinearLayout)",
+   "4/63 (TextView)"
+  ],
+  "gold": {
+   "operation": "CLICK",
+   "target": 12,
+   "target_label": "- (ImageView)"
+  },
+  "pred_operation_top3": [
+   [
+    "CLICK",
+    0.751
+   ],
+   [
+    "SCROLL_LEFT",
+    0.124
+   ],
+   [
+    "DONE",
+    0.043
+   ]
+  ],
+  "pred_target_top3": [
+   [
+    9,
+    "- (ImageView)",
+    0.127
+   ],
+   [
+    13,
+    "- (ImageView)",
+    0.096
+   ],
+   [
+    12,
+    "- (ImageView)",
+    0.083
+   ]
+  ]
+ }
+}

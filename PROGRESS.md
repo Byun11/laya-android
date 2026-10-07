@@ -65,3 +65,18 @@
 - Target by candidates (IDD) base→smoke: 1–5 .335→.748, 6–10 .150→.480, 11–20 .107→.463, 21–50 .056→.391, >50 .029→.353.
 - Weak ops (IDD recall): BACK 0.05, WAIT 0.16, DONE 0.38, SCROLL_LEFT/RIGHT ~0.12, LONG_PRESS 0 (157 train examples).
 - Stop/Go: all five checks pass → GO for full, pending user decision.
+
+### Full run v0 (`configs/full.yaml`, `reports/train_laya-android-v0.json`, `reports/full_v0_val.json`)
+- 88,308 steps → 132,448 items, 0 skipped. 3 epochs, 2.726h on RTX 4090. All epoch checkpoints kept (`epoch1..3`).
+- Validation only (test not run):
+
+| epoch | train loss | op acc | op macro-F1 | target top-1 | joint | ECE op (uncalibrated) |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 | 1.019 | 0.768 | 0.543 | 0.631 | 0.605 | 0.027 |
+| 2 | 0.653 | 0.797 | 0.542 | 0.703 | **0.669** | 0.028 |
+| 3 | 0.366 | 0.790 | 0.574 | 0.703 | 0.665 | 0.105 |
+
+- Selected: **epoch 2** (val joint). ep2 vs ep3 gap 0.004 is inside run-to-run noise (~1pt); rule applied as written. Epoch 3 shows overfitting signs: loss drops in steps at epoch boundaries, uncalibrated ECE 0.105.
+- Final (`checkpoints/laya-android-v0`, val temperatures op 1.161): val joint 0.669, target 0.703, op 0.797, macro-F1 0.542, ECE op 0.027 (in-sample: fit on the same val), latency p50 35ms.
+- Target by candidates (val, ep2): 1–5 0.842, 6–10 0.711, 11–20 0.695, 21–50 0.634, >50 0.667 (n=6).
+- Op recall (val, ep2): CLICK .881, OPEN_APP .956, INPUT_TEXT .849, DONE .759, BACK .655, SCROLL_UP .667, SCROLL_DOWN .634, WAIT .482, LONG_PRESS 0, SCROLL_LEFT 0, SCROLL_RIGHT 0 (tiny val n).

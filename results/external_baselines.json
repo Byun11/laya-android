@@ -1,0 +1,12 @@
+[
+ {
+  "model": "InfiGUI-R1-3B",
+  "params": "3B",
+  "input": "screenshot",
+  "benchmark": "AndroidControl-High",
+  "metrics": {"type": 82.7, "grounding": 74.4, "full_sr": 71.1},
+  "source_url": "https://github.com/InfiXAI/InfiGUI-R1/blob/a4fca17809a4395ba1fe08d481bb82c790ea7236/README.md",
+  "source_title": "InfiGUI-R1: Advancing Multimodal GUI Agents from Reactive Actors to Deliberative Reasoners (arXiv:2504.14239), README results table and paper Table 3",
+  "notes": "Reported by the authors, not reproduced by us. Same evaluator family as ours (eval/android_control at a4fca17, 8,444 test steps, bbox-or-4% click rule). Their model sees screenshots and predicts free coordinates; ours selects among accessibility-derived candidates."
+ }
+]

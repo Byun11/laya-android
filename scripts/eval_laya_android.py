@@ -14,6 +14,7 @@ Metrics per split:
 """
 import argparse
 import collections
+import gzip
 import json
 import os
 import sys
@@ -94,7 +95,7 @@ def op_per_class(pairs, ops):
     return {"operation_macro_f1": round(sum(f1s) / len(f1s), 4) if f1s else None, "op_per_class": per}
 
 
-def evaluate_split(model, tok, cfg, path, limit=None, low_level=False, batch_size=32, latency_n=200):
+def evaluate_split(model, tok, cfg, path, limit=None, low_level=False, batch_size=32, latency_n=200, preds_path=None):
     steps = []
     with open(path, encoding="utf8") as f:
         for line in f:
@@ -154,6 +155,17 @@ def evaluate_split(model, tok, cfg, path, limit=None, low_level=False, batch_siz
         m["joint_n"] += 1
         m["joint_correct"] += op_ok and tgt_ok
 
+    if preds_path:  # raw per-step predictions, so later analysis never needs another pass over test
+        with gzip.open(preds_path, "wt", encoding="utf8") as f:
+            for i, it in enumerate(steps):
+                p_op, p_t = pred.get((i, "operation")), pred.get((i, "target"))
+                f.write(json.dumps({
+                    "episode_id": it["episode_id"], "step": it["step"], "operation_gold": it["operation_gold"],
+                    "target_gold": it["target_gold"], "target_groundable": it["target_groundable"],
+                    "candidate_count": it["candidate_count"],
+                    "operation_probs": None if p_op is None else dict(zip(ops, np.round(p_op.astype(float), 5).tolist())),
+                    "target_probs": None if p_t is None else np.round(p_t.astype(float), 5).tolist()}) + "\n")
+
     # latency: both questions of a step in one forward, batch 1, after warmup
     lat = []
     for i in range(min(latency_n + 5, len(steps))):
@@ -188,12 +200,18 @@ def main(default_model=None):
     ap.add_argument("--limit", type=int)
     ap.add_argument("--low-level", action="store_true", help="oracle-low-level diagnostic (adds step instruction)")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--preds-dir", help="write <split>.preds.jsonl.gz with per-step probabilities")
     args = ap.parse_args()
     model, tok, cfg = load(args.model)
     report = {"model": args.model, "low_level": args.low_level, "max_len": MAX_LEN, "head_max_len": HEAD_MAX_LEN,
-              "limit": args.limit, "splits": {}}
+              "limit": args.limit, "temperature": cfg.get("temperature"),
+              "temperature_by_options": cfg.get("temperature_by_options"), "splits": {}}
+    if args.preds_dir:
+        os.makedirs(args.preds_dir, exist_ok=True)
     for s in args.splits.split(","):
-        report["splits"][s] = evaluate_split(model, tok, cfg, os.path.join(PROC, s + ".jsonl"), args.limit, args.low_level)
+        preds = os.path.join(args.preds_dir, s + ".preds.jsonl.gz") if args.preds_dir else None
+        report["splits"][s] = evaluate_split(model, tok, cfg, os.path.join(PROC, s + ".jsonl"), args.limit,
+                                             args.low_level, preds_path=preds)
         print(s, json.dumps({k: v for k, v in report["splits"][s].items() if not isinstance(v, dict)}), flush=True)
     with open(args.out, "w") as f:
         json.dump(report, f, indent=1)

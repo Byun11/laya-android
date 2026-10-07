@@ -13,5 +13,5 @@ Small JSON outputs of the scripts. All numbers are AndroidControl, high-level go
 
 Notes:
 - The smoke checkpoint was evaluated on the test subsplits once, before the rule "test only after the configuration is frozen" was adopted. Those smoke test numbers were not used for any later decision.
-- Full-run results (`train_laya-android-v0.json`, final evaluation) are added when the run is complete.
+- Final results (test metrics, predictions, latency, figures) live in `results/` and `figures/`; see `results/tables.md`.
 - `model` fields hold the local checkpoint path that was evaluated.

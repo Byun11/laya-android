@@ -17,3 +17,7 @@ wandb/
 research/
 tasks/
 hf_staging/
+
+# local agent/tool state
+.omc/
+.claude/

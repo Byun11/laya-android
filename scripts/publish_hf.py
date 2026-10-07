@@ -5,7 +5,7 @@ python scripts/publish_hf.py --checkpoint D:/laya-android/checkpoints/laya-andro
 
 Without --upload it only writes $LAYA_ANDROID_DATA/hf_staging/<repo-name>/ for inspection. The staged folder loads with
 `laya.load(path)`: model.safetensors, encoder/, tokenizer/, rl_agent_config.json, plus README.md
-(from MODEL_CARD.md), LICENSE, NOTICE, laya_android_metadata.json and the given eval JSONs.
+(from MODEL_CARD.md), figures/, LICENSE, NOTICE, laya_android_metadata.json and the given eval JSONs.
 """
 import argparse
 import json
@@ -31,6 +31,7 @@ def stage(checkpoint, repo, evals):
     shutil.copy2(os.path.join(ROOT, "MODEL_CARD.md"), os.path.join(out, "README.md"))
     for f in ("LICENSE", "NOTICE"):
         shutil.copy2(os.path.join(ROOT, f), os.path.join(out, f))
+    shutil.copytree(os.path.join(ROOT, "figures"), os.path.join(out, "figures"))  # images the card links to
     with open(os.path.join(checkpoint, "rl_agent_config.json"), encoding="utf8") as f:
         cfg = json.load(f)
     meta = {"base_model": BASE, "max_len": cfg.get("max_len"), "head_max_len": cfg.get("head_max_len"),
